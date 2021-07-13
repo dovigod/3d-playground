@@ -45,19 +45,18 @@ const renderer = new THREE.WebGLRenderer({
 
 renderer.setSize(sizes.width, sizes.height);
 
-let time = Date.now();
+let clock = new THREE.Clock();
 
 const animate = () => {
-	const currentTime = Date.now();
-	const deltaTime = currentTime - time;
-	time = currentTime;
-
+	const elapsedTime = clock.getElapsedTime(); // 선언후 경과 시간
 	//update
 
 	renderer.render(scene, camera);
 
 	// will rotate in same rotationrate on every browser
-	group.rotation.y += 0.01 * deltaTime;
+	group.rotation.y = elapsedTime * Math.PI * 2; // 1 revolution per sec
+	group.position.y = Math.sin(elapsedTime); // up and down
+	group.position.x = Math.cos(elapsedTime); // left and right ==> circular movement
 
 	window.requestAnimationFrame(animate);
 };
