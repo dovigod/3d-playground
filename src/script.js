@@ -45,4 +45,21 @@ const renderer = new THREE.WebGLRenderer({
 
 renderer.setSize(sizes.width, sizes.height);
 
-renderer.render(scene, camera);
+let time = Date.now();
+
+const animate = () => {
+	const currentTime = Date.now();
+	const deltaTime = currentTime - time;
+	time = currentTime;
+
+	//update
+
+	renderer.render(scene, camera);
+
+	// will rotate in same rotationrate on every browser
+	group.rotation.y += 0.01 * deltaTime;
+
+	window.requestAnimationFrame(animate);
+};
+
+animate();
