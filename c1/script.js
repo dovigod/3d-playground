@@ -24,3 +24,6 @@ scene.add(camera);
 const renderer = new THREE.WebGLRenderer({
 	canvas: document.querySelector('canvas')
 });
+
+// renderer의 사이즈를 정함
+renderer.setSize(sizes.width, sizes.height);
