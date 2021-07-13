@@ -16,19 +16,17 @@ mesh.position.z = 2;
 // ===> mesh.position.set(0.7, -.6, 2);
 //inherited from Vector3
 
+//ordering rotation order
+mesh.rotation.reorder('YXZ');
+mesh.rotation.x = Math.PI * 0.25;
+mesh.rotation.y = Math.PI * 0.25;
+
+mesh.scale.set(2, 2, 2);
+
 scene.add(mesh);
 
-//logs distance of marterial from origin
-console.log(mesh.position.length());
-
-//distanceTo returns distance betewwn each Vector3
-console.log(mesh.position.distanceTo(new THREE.Vector3(0, 0, 0)));
-
-//normalize ::
-//take the length of vector, and reduce it to 1
-mesh.position.normalize();
-
-console.log(mesh.position.length());
+const axesHelper = new THREE.AxesHelper();
+scene.add(axesHelper);
 
 //Camera
 const sizes = {
@@ -37,7 +35,10 @@ const sizes = {
 };
 // 시야각 = fov 망원경 vs 전체 , aspect Ratio  width / height of viewPort
 const camera = new THREE.PerspectiveCamera(60, sizes.width / sizes.height);
-camera.position.z = 3;
+camera.position.set(1, 1, 10);
+
+//target is Vector3
+camera.lookAt(mesh.position); // will look at the center of mesh
 
 scene.add(camera);
 
