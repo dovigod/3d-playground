@@ -1,5 +1,6 @@
 import './style.css';
 import * as THREE from 'three';
+import gsap from 'gsap';
 
 const scene = new THREE.Scene();
 
@@ -46,6 +47,10 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(sizes.width, sizes.height);
 
 let clock = new THREE.Clock();
+
+gsap.to(group.position, { duration: 1, delay: 1, x: 2 });
+
+gsap.to(group.position, { duration: 1, delay: 2, x: 0 });
 
 const animate = () => {
 	const elapsedTime = clock.getElapsedTime(); // 선언후 경과 시간
