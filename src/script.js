@@ -6,34 +6,23 @@ const scene = new THREE.Scene();
 
 //object
 
-const group = new THREE.Group();
-scene.add(group);
-
-const cube1 = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ color: 0xff0000 }));
-
-const cube2 = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ color: 0x00ff00 }));
-
-cube2.position.set(1, 0, -2);
-
-group.add(cube1);
-group.add(cube2);
-
-group.position.set(0, 1, 0);
-group.scale.y = 2;
-group.rotation.y = 1;
-
-scene.add(group);
-const axesHelper = new THREE.AxesHelper();
-scene.add(axesHelper);
-
+const cube = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ color: 0xff0000 }));
+cube.position.set(0, 0, 0);
+scene.add(cube);
 //Camera
 const sizes = {
 	width: 800,
 	height: 600
 };
 
-const camera = new THREE.PerspectiveCamera(60, sizes.width / sizes.height);
-camera.position.set(1, 1, 10);
+//field of view (degree) vertical vision angle.. not horizontal part
+// if increase -> distortion may happen , 한 화면에 모든걸 다 담으려 하니
+// 종횡비
+//near frustum ..  near < x < far x area may be only seen
+//far
+const camera = new THREE.PerspectiveCamera(60, sizes.width / sizes.height, 0.0001, 10000);
+camera.position.set(5, 5, -1);
+camera.lookAt(new THREE.Vector3(0, 0, 0));
 
 scene.add(camera);
 
@@ -48,10 +37,6 @@ renderer.setSize(sizes.width, sizes.height);
 
 let clock = new THREE.Clock();
 
-gsap.to(group.position, { duration: 1, delay: 1, x: 2 });
-
-gsap.to(group.position, { duration: 1, delay: 2, x: 0 });
-
 const animate = () => {
 	const elapsedTime = clock.getElapsedTime(); // 선언후 경과 시간
 	//update
@@ -59,10 +44,8 @@ const animate = () => {
 	renderer.render(scene, camera);
 
 	// will rotate in same rotationrate on every browser
-	group.rotation.y = elapsedTime * Math.PI * 2; // 1 revolution per sec
-	group.position.y = Math.sin(elapsedTime); // up and down
-	group.position.x = Math.cos(elapsedTime); // left and right ==> circular movement
 
+	cube.rotation.y = elapsedTime * 2;
 	window.requestAnimationFrame(animate);
 };
 
