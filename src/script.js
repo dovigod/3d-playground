@@ -1,13 +1,12 @@
 import './style.css';
 import * as THREE from 'three';
 import gsap from 'gsap';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 const sizes = {
 	width: 800,
 	height: 600
 };
-
-//cursor
 
 const cursor = {
 	x: undefined,
@@ -42,6 +41,12 @@ const renderer = new THREE.WebGLRenderer({
 
 renderer.setSize(sizes.width, sizes.height);
 
+//controls
+
+const controls = new OrbitControls(camera, canvas);
+controls.target.y = 1;
+controls.update();
+
 // let clock = new THREE.Clock();
 
 const animate = () => {
@@ -49,9 +54,6 @@ const animate = () => {
 
 	renderer.render(scene, camera);
 
-	camera.position.x = cursor.x * 10;
-	camera.position.y = cursor.y * 10;
-	camera.lookAt(cube.position);
 	// cube.rotation.y = elapsedTime * 2;
 	window.requestAnimationFrame(animate);
 };
