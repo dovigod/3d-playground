@@ -15,16 +15,16 @@ const sizes = {
 	height: 600
 };
 
-//field of view (degree) vertical vision angle.. not horizontal part
-// if increase -> distortion may happen , 한 화면에 모든걸 다 담으려 하니
-// 종횡비
-//near frustum ..  near < x < far x area may be only seen
-//far
-const camera = new THREE.PerspectiveCamera(60, sizes.width / sizes.height, 0.0001, 10000);
-camera.position.set(5, 5, -1);
-camera.lookAt(new THREE.Vector3(0, 0, 0));
+// const camera = new THREE.PerspectiveCamera(60, sizes.width / sizes.height, 0.0001, 10000);
 
+//left right top bottom
+const aspectRatio = sizes.width / sizes.height;
+const camera = new THREE.OrthographicCamera(-1 * aspectRatio, 1 * aspectRatio, 1, -1, 0.1, 100);
+camera.position.set(2, 2, 2);
+camera.lookAt(0, 0, 0);
 scene.add(camera);
+//camera looks flatt..ac
+// multipy aspectRatio
 
 //renderer
 
