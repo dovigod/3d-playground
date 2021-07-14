@@ -44,6 +44,7 @@ renderer.setSize(sizes.width, sizes.height);
 //controls
 
 const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true; // friction
 controls.target.y = 1;
 controls.update();
 
@@ -52,6 +53,7 @@ controls.update();
 const animate = () => {
 	// const elapsedTime = clock.getElapsedTime();
 
+	controls.update(); // for damping
 	renderer.render(scene, camera);
 
 	// cube.rotation.y = elapsedTime * 2;
