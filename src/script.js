@@ -40,6 +40,9 @@ const renderer = new THREE.WebGLRenderer({
 });
 
 renderer.setSize(sizes.width, sizes.height);
+// renderer.setPixelRatio(window.devicePixelRatio)
+// 1픽셀을 n의2으로 나눔
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
 //controls
 
@@ -64,8 +67,29 @@ animate();
 
 window.addEventListener('resize', (e) => {
 	sizes.width = window.innerWidth;
-	sized.height = window.innerHeight;
+	sizes.height = window.innerHeight;
 	camera.aspect = sizes.width / sizes.height;
 	camera.updateProjectionMatrix();
 	renderer.setSize(sizes.width, sizes.height);
+});
+
+window.addEventListener('dblclick', (e) => {
+	const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement;
+
+	if (!fullscreenElement) {
+		if (canvas.requestFullscreen) {
+			canvas.requestFullscreen();
+		} else if (canvas.webkitFullscreen) {
+			canvas.webkitRequestFullscreen();
+		}
+		// not on safari
+	} else {
+		if (document.exitFullscreen) {
+			document.exitFullscreen();
+		} else if (document.webkitExitFullscreen) {
+			document.webkitExitFullscreen();
+		}
+
+		console.log('exit fullscreen');
+	}
 });
