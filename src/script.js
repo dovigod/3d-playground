@@ -4,8 +4,8 @@ import gsap from 'gsap';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 const sizes = {
-	width: 800,
-	height: 600
+	width: window.innerWidth,
+	height: window.innerHeight
 };
 
 const cursor = {
@@ -61,3 +61,11 @@ const animate = () => {
 };
 
 animate();
+
+window.addEventListener('resize', (e) => {
+	sizes.width = window.innerWidth;
+	sized.height = window.innerHeight;
+	camera.aspect = sizes.width / sizes.height;
+	camera.updateProjectionMatrix();
+	renderer.setSize(sizes.width, sizes.height);
+});
