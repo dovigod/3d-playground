@@ -119,5 +119,11 @@ const eventListeners = () => {
 	});
 };
 
+<<<<<<< HEAD
 eventListeners();
 animate();
+=======
+		console.log('exit fullscreen');
+	}
+});
+>>>>>>> 81942f59687363edc43c7d938b4bedfd32b1d0ee
