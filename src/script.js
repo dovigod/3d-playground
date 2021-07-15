@@ -85,4 +85,3 @@ window.addEventListener('dblclick', (e) => {
 		console.log('exit fullscreen');
 	}
 });
-ㅁㄴㅇㅁㄴㅇㄴㅁㅇㅁㄴㅇㅁㄴ;
