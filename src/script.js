@@ -21,7 +21,14 @@ const scene = new THREE.Scene();
 
 //object
 
-const cube = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ color: 0xff0000 }));
+//bufferGeometry => chip memory
+//float 32ARRay => native js , can store only float ,fixed length easy for computer to handle
+
+const cube = new THREE.Mesh(
+	new THREE.BoxBufferGeometry(1, 1, 1, 4, 4, 4),
+	new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true })
+);
+
 cube.position.set(0, 0, 0);
 scene.add(cube);
 
@@ -54,35 +61,37 @@ const animate = () => {
 	renderer.render(scene, camera);
 	window.requestAnimationFrame(animate);
 };
+
+const eventListeners = () => {
+	window.addEventListener('resize', (e) => {
+		sizes.width = window.innerWidth;
+		sizes.height = window.innerHeight;
+		camera.aspect = sizes.width / sizes.height;
+		camera.updateProjectionMatrix();
+		renderer.setSize(sizes.width, sizes.height);
+	});
+
+	window.addEventListener('dblclick', (e) => {
+		const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement;
+
+		if (!fullscreenElement) {
+			if (canvas.requestFullscreen) {
+				canvas.requestFullscreen();
+			} else if (canvas.webkitFullscreen) {
+				canvas.webkitRequestFullscreen();
+			}
+			// not on safari
+		} else {
+			if (document.exitFullscreen) {
+				document.exitFullscreen();
+			} else if (document.webkitExitFullscreen) {
+				document.webkitExitFullscreen();
+			}
+
+			console.log('exit fullscreen');
+		}
+	});
+};
+
 eventListeners();
 animate();
-
-window.addEventListener('resize', (e) => {
-	sizes.width = window.innerWidth;
-	sizes.height = window.innerHeight;
-	camera.aspect = sizes.width / sizes.height;
-	camera.updateProjectionMatrix();
-	renderer.setSize(sizes.width, sizes.height);
-});
-
-window.addEventListener('dblclick', (e) => {
-	const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement;
-
-	if (!fullscreenElement) {
-		if (canvas.requestFullscreen) {
-			canvas.requestFullscreen();
-		} else if (canvas.webkitFullscreen) {
-			canvas.webkitRequestFullscreen();
-		}
-		// not on safari
-	} else {
-		if (document.exitFullscreen) {
-			document.exitFullscreen();
-		} else if (document.webkitExitFullscreen) {
-			document.webkitExitFullscreen();
-		}
-
-		console.log('exit fullscreen');
-	}
-});
-ㅁㄴㅇㅁㄴㅇㄴㅁㅇㅁㄴㅇㅁㄴ;
