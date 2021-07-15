@@ -23,14 +23,40 @@ const scene = new THREE.Scene();
 
 //bufferGeometry => chip memory
 //float 32ARRay => native js , can store only float ,fixed length easy for computer to handle
+const positionsArray = new Float32Array([0, 0, 0, 0, 1, 0, 0, 0, 1]); // length of 9
+// then convert this to THREE.js bufferAttribute
+// positionsArray[0] = 0;
+// positionsArray[1] = 0;
+// positionsArray[2] = 0;
 
-const cube = new THREE.Mesh(
-	new THREE.BoxBufferGeometry(1, 1, 1, 4, 4, 4),
-	new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true })
-);
+// positionsArray[3] = 0;
+// positionsArray[4] = 1;
+// positionsArray[5] = 0;
 
-cube.position.set(0, 0, 0);
-scene.add(cube);
+// positionsArray[6] = 1;
+// positionsArray[7] = 0;
+// positionsArray[8] = 0;
+
+const positionsAttribute = new THREE.BufferAttribute(positionsArray, 3);
+// 3 == 1 vertex contains
+const geometry = new THREE.BufferGeometry();
+geometry.setAttribute('position', positionsAttribute);
+
+const material = new THREE.MeshBasicMaterial({
+	color: 0xff0000,
+	wireframe: true
+});
+
+const mesh = new THREE.Mesh(geometry, material);
+
+scene.add(mesh);
+// const cube = new THREE.Mesh(
+// 	new THREE.BoxBufferGeometry(1, 1, 1, 4, 4, 4),
+// 	new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true })
+// );
+
+// cube.position.set(0, 0, 0);
+// scene.add(cube);
 
 //Camera
 
