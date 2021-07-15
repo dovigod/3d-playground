@@ -5,45 +5,36 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import * as dat from 'dat.gui';
 
 // Textures
+const loadingManager = new THREE.LoadingManager();
 
-//native way
-// const image = new Image();
-// image.src = '/textures/door/color.jpg';
-// image.onload = () => {
-// 	const texture = new THREE.Texture(image);
-// 	console.log(texture);
-// };
-//need to convert to textures
+loadingManager.onStart = () => {
+	console.log('onStart');
+};
 
-//better Way
-// const image = new Image();
-// const texture = new THREE.Texture(image);
+loadingManager.onLoad = () => {
+	console.log('onLoad');
+};
+loadingManager.onProgress = () => {
+	console.log('progress');
+};
+loadingManager.onError = () => {
+	console.log('errer');
+};
 
-// image.onload = () => {
-// 	texture.needsUpdate = true; // textrue needs upadte when loaded
-// };
-// image.src = '/textures/door/color.jpg';
-
-//much more using loader
-const textureLoader = new THREE.TextureLoader();
-const texture = textureLoader.load(
-	'/textures/door/color.jpg',
-	() => {
-		console.log('load');
-	},
-	() => {
-		console.log('progress');
-	},
-	() => {
-		console.log('error');
-	}
-);
+const textureLoader = new THREE.TextureLoader(loadingManager);
+const colorTexture = textureLoader.load('/textures/door/color.jpg');
+const alphaTexture = textureLoader.load('/textures/door/alpha.jpg');
+const heightTexture = textureLoader.load('/textures/door/height.jpg');
+const normalTexture = textureLoader.load('/textures/door/normal.jpg');
+const ambientOcclusionTexture = textureLoader.load('/textures/door/ambientOcclusion.jpg');
+const metalnessTexture = textureLoader.load('/textures/door/metalness.jpg');
+const roughnessTexture = textureLoader.load('/textures/door/roughnes.jpg');
 
 const gui = new dat.GUI();
 gui.hide();
-// range , color ,text , checkbox , select , button , folder ...많다!
+
 const meshParams = {
-	color: '#ff0000', // need to set as string for dat.gui
+	color: '#ff0000',
 	spin: () => {
 		gsap.to(mesh.rotation, { duration: 1, y: mesh.rotation.y + Math.PI * 2 });
 	}
@@ -70,7 +61,7 @@ const geometry = new THREE.BoxBufferGeometry(1, 1, 1, 2, 2, 2);
 
 const material = new THREE.MeshBasicMaterial({
 	color: meshParams.color,
-	map: texture
+	map: colorTexture
 });
 
 const mesh = new THREE.Mesh(geometry, material);
