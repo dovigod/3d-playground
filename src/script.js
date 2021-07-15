@@ -40,8 +40,6 @@ const renderer = new THREE.WebGLRenderer({
 });
 
 renderer.setSize(sizes.width, sizes.height);
-// renderer.setPixelRatio(window.devicePixelRatio)
-// 1픽셀을 n의2으로 나눔
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
 //controls
@@ -51,18 +49,12 @@ controls.enableDamping = true; // friction
 controls.target.y = 1;
 controls.update();
 
-// let clock = new THREE.Clock();
-
 const animate = () => {
-	// const elapsedTime = clock.getElapsedTime();
-
 	controls.update(); // for damping
 	renderer.render(scene, camera);
-
-	// cube.rotation.y = elapsedTime * 2;
 	window.requestAnimationFrame(animate);
 };
-
+eventListeners();
 animate();
 
 window.addEventListener('resize', (e) => {
@@ -93,3 +85,4 @@ window.addEventListener('dblclick', (e) => {
 		console.log('exit fullscreen');
 	}
 });
+ㅁㄴㅇㅁㄴㅇㄴㅁㅇㅁㄴㅇㅁㄴ;
