@@ -21,21 +21,13 @@ const scene = new THREE.Scene();
 
 //object
 
-//bufferGeometry => chip memory
-//float 32ARRay => native js , can store only float ,fixed length easy for computer to handle
-const positionsArray = new Float32Array([0, 0, 0, 0, 1, 0, 0, 0, 1]); // length of 9
+const count = 50;
+const positionsArray = new Float32Array(count * 3 * 3); // length of 9
 // then convert this to THREE.js bufferAttribute
-// positionsArray[0] = 0;
-// positionsArray[1] = 0;
-// positionsArray[2] = 0;
 
-// positionsArray[3] = 0;
-// positionsArray[4] = 1;
-// positionsArray[5] = 0;
-
-// positionsArray[6] = 1;
-// positionsArray[7] = 0;
-// positionsArray[8] = 0;
+for (let i = 0; i < count * 3 * 3; i++) {
+	positionsArray[i] = Math.random() - 0.5;
+}
 
 const positionsAttribute = new THREE.BufferAttribute(positionsArray, 3);
 // 3 == 1 vertex contains
@@ -119,11 +111,5 @@ const eventListeners = () => {
 	});
 };
 
-<<<<<<< HEAD
 eventListeners();
 animate();
-=======
-		console.log('exit fullscreen');
-	}
-});
->>>>>>> 81942f59687363edc43c7d938b4bedfd32b1d0ee
