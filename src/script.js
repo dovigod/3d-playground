@@ -4,7 +4,41 @@ import gsap from 'gsap';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import * as dat from 'dat.gui';
 
-// h -> hide button
+// Textures
+
+//native way
+// const image = new Image();
+// image.src = '/textures/door/color.jpg';
+// image.onload = () => {
+// 	const texture = new THREE.Texture(image);
+// 	console.log(texture);
+// };
+//need to convert to textures
+
+//better Way
+// const image = new Image();
+// const texture = new THREE.Texture(image);
+
+// image.onload = () => {
+// 	texture.needsUpdate = true; // textrue needs upadte when loaded
+// };
+// image.src = '/textures/door/color.jpg';
+
+//much more using loader
+const textureLoader = new THREE.TextureLoader();
+const texture = textureLoader.load(
+	'/textures/door/color.jpg',
+	() => {
+		console.log('load');
+	},
+	() => {
+		console.log('progress');
+	},
+	() => {
+		console.log('error');
+	}
+);
+
 const gui = new dat.GUI();
 gui.hide();
 // range , color ,text , checkbox , select , button , folder ...많다!
@@ -36,7 +70,7 @@ const geometry = new THREE.BoxBufferGeometry(1, 1, 1, 2, 2, 2);
 
 const material = new THREE.MeshBasicMaterial({
 	color: meshParams.color,
-	wireframe: true
+	map: texture
 });
 
 const mesh = new THREE.Mesh(geometry, material);
@@ -48,17 +82,13 @@ gui.add(mesh.position, 'y', -3, 3, 0.01);
 gui.add(mesh.position, 'x').min(-3).max(3).step(0.01);
 gui.add(mesh.position, 'z', -3, 3, 0.01).name('zPosition');
 
-gui.add(mesh, 'visible'); // if object is boolean => checkbox
+gui.add(mesh, 'visible');
 
 gui.add(material, 'wireframe');
 
-//when adding color
 gui.addColor(meshParams, 'color').onChange(() => {
 	material.color = new THREE.Color(meshParams.color);
 });
-
-//when adding function
-
 gui.add(meshParams, 'spin');
 
 const camera = new THREE.PerspectiveCamera(60, sizes.width / sizes.height, 0.0001, 10000);
