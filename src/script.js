@@ -30,11 +30,28 @@ const ambientOcclusionTexture = textureLoader.load('/textures/door/ambientOcclus
 const metalnessTexture = textureLoader.load('/textures/door/metalness.jpg');
 const roughnessTexture = textureLoader.load('/textures/door/roughnes.jpg');
 
+// colorTexture.repeat.x = 2; // 한 텍스쳐를 해당 면의 1/2
+// colorTexture.repeat.y = 3; // '' 1/3
+// colorTexture.wrapS = THREE.RepeatWrapping;
+// // colorTexture.wrapT = THREE.RepeatWrapping;
+// colorTexture.wrapS = THREE.MirroredRepeatWrapping;
+// colorTexture.wrapT = THREE.MirroredRepeatWrapping; // 상하 반전
+// colorTexture.wrapS = THREE.MirroredRepeatWrapping;
+// colorTexture.wrapT = THREE.MirroredRepeatWrapping;
+
+// colorTexture.offset.x = 0.5; // 우측으로 반 이동 보여주기
+// colorTexture.offset.y = 0.5; // 우측으로 반 이동 보여주기
+
+colorTexture.rotation = Math.PI / 4; // rotation point left bottom default.. move pivot on center
+//텍스쳐는 좌표계 0 ~ 1
+colorTexture.center.x = 0.5;
+colorTexture.center.y = 0.5;
+
 const gui = new dat.GUI();
 gui.hide();
 
 const meshParams = {
-	color: '#ff0000',
+	color: '#efff00',
 	spin: () => {
 		gsap.to(mesh.rotation, { duration: 1, y: mesh.rotation.y + Math.PI * 2 });
 	}
