@@ -2,7 +2,18 @@ import './style.css';
 import * as THREE from 'three';
 import gsap from 'gsap';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import * as dat from 'dat.gui';
 
+// h -> hide button
+const gui = new dat.GUI();
+gui.hide();
+// range , color ,text , checkbox , select , button , folder ...많다!
+const meshParams = {
+	color: '#ff0000', // need to set as string for dat.gui
+	spin: () => {
+		gsap.to(mesh.rotation, { duration: 1, y: mesh.rotation.y + Math.PI * 2 });
+	}
+};
 const sizes = {
 	width: window.innerWidth,
 	height: window.innerHeight
@@ -21,36 +32,34 @@ const scene = new THREE.Scene();
 
 //object
 
-const count = 50;
-const positionsArray = new Float32Array(count * 3 * 3); // length of 9
-// then convert this to THREE.js bufferAttribute
-
-for (let i = 0; i < count * 3 * 3; i++) {
-	positionsArray[i] = Math.random() - 0.5;
-}
-
-const positionsAttribute = new THREE.BufferAttribute(positionsArray, 3);
-// 3 == 1 vertex contains
-const geometry = new THREE.BufferGeometry();
-geometry.setAttribute('position', positionsAttribute);
+const geometry = new THREE.BoxBufferGeometry(1, 1, 1, 2, 2, 2);
 
 const material = new THREE.MeshBasicMaterial({
-	color: 0xff0000,
+	color: meshParams.color,
 	wireframe: true
 });
 
 const mesh = new THREE.Mesh(geometry, material);
-
 scene.add(mesh);
-// const cube = new THREE.Mesh(
-// 	new THREE.BoxBufferGeometry(1, 1, 1, 4, 4, 4),
-// 	new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true })
-// );
 
-// cube.position.set(0, 0, 0);
-// scene.add(cube);
+//debug
 
-//Camera
+gui.add(mesh.position, 'y', -3, 3, 0.01);
+gui.add(mesh.position, 'x').min(-3).max(3).step(0.01);
+gui.add(mesh.position, 'z', -3, 3, 0.01).name('zPosition');
+
+gui.add(mesh, 'visible'); // if object is boolean => checkbox
+
+gui.add(material, 'wireframe');
+
+//when adding color
+gui.addColor(meshParams, 'color').onChange(() => {
+	material.color = new THREE.Color(meshParams.color);
+});
+
+//when adding function
+
+gui.add(meshParams, 'spin');
 
 const camera = new THREE.PerspectiveCamera(60, sizes.width / sizes.height, 0.0001, 10000);
 camera.position.set(0, 0, 3);
