@@ -22,7 +22,7 @@ loadingManager.onError = () => {
 };
 
 const textureLoader = new THREE.TextureLoader(loadingManager);
-const colorTexture = textureLoader.load('/textures/door/color.jpg');
+const colorTexture = textureLoader.load('/textures/checkerboard-8x8.png');
 const alphaTexture = textureLoader.load('/textures/door/alpha.jpg');
 const heightTexture = textureLoader.load('/textures/door/height.jpg');
 const normalTexture = textureLoader.load('/textures/door/normal.jpg');
@@ -30,28 +30,23 @@ const ambientOcclusionTexture = textureLoader.load('/textures/door/ambientOcclus
 const metalnessTexture = textureLoader.load('/textures/door/metalness.jpg');
 const roughnessTexture = textureLoader.load('/textures/door/roughnes.jpg');
 
-// colorTexture.repeat.x = 2; // 한 텍스쳐를 해당 면의 1/2
-// colorTexture.repeat.y = 3; // '' 1/3
-// colorTexture.wrapS = THREE.RepeatWrapping;
-// // colorTexture.wrapT = THREE.RepeatWrapping;
-// colorTexture.wrapS = THREE.MirroredRepeatWrapping;
-// colorTexture.wrapT = THREE.MirroredRepeatWrapping; // 상하 반전
-// colorTexture.wrapS = THREE.MirroredRepeatWrapping;
-// colorTexture.wrapT = THREE.MirroredRepeatWrapping;
+// minification happens when texture is smaller than original,, like zoom out, blurred points
+// mip mapping => size down untill 1x1
+//when too small... morie pattern occurs
 
-// colorTexture.offset.x = 0.5; // 우측으로 반 이동 보여주기
-// colorTexture.offset.y = 0.5; // 우측으로 반 이동 보여주기
+colorTexture.generateMipmaps = false;
+colorTexture.minFilter = THREE.NearestFilter;
 
-colorTexture.rotation = Math.PI / 4; // rotation point left bottom default.. move pivot on center
-//텍스쳐는 좌표계 0 ~ 1
-colorTexture.center.x = 0.5;
-colorTexture.center.y = 0.5;
+//magnification filter => pixel gets stretched when texture is too small for it
+//gets blurred when stretched
+colorTexture.magFilter = THREE.NearestFilter; // gets sharp!!
+//**** nearest fillter gives better performance  when minification , nearest filter dont use mipmapping so cheaper */
 
 const gui = new dat.GUI();
 gui.hide();
 
 const meshParams = {
-	color: '#efff00',
+	color: '#ffffff',
 	spin: () => {
 		gsap.to(mesh.rotation, { duration: 1, y: mesh.rotation.y + Math.PI * 2 });
 	}
@@ -82,6 +77,8 @@ const material = new THREE.MeshBasicMaterial({
 });
 
 const mesh = new THREE.Mesh(geometry, material);
+
+mesh.position.y = 1;
 scene.add(mesh);
 
 //debug
