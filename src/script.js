@@ -4,40 +4,19 @@ import gsap from 'gsap';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import * as dat from 'dat.gui';
 
-// Textures
-const loadingManager = new THREE.LoadingManager();
 
-loadingManager.onStart = () => {
-	console.log('onStart');
-};
+//textures 
+const loader = new THREE.TextureLoader()
 
-loadingManager.onLoad = () => {
-	console.log('onLoad');
-};
-loadingManager.onProgress = () => {
-	console.log('progress');
-};
-loadingManager.onError = () => {
-	console.log('errer');
-};
-
-const textureLoader = new THREE.TextureLoader(loadingManager);
-const colorTexture = textureLoader.load('/textures/checkerboard-8x8.png');
-const alphaTexture = textureLoader.load('/textures/door/alpha.jpg');
-const heightTexture = textureLoader.load('/textures/door/height.jpg');
-const normalTexture = textureLoader.load('/textures/door/normal.jpg');
-const ambientOcclusionTexture = textureLoader.load('/textures/door/ambientOcclusion.jpg');
-const metalnessTexture = textureLoader.load('/textures/door/metalness.jpg');
-const roughnessTexture = textureLoader.load('/textures/door/roughnes.jpg');
-
-colorTexture.generateMipmaps = false;
-colorTexture.minFilter = THREE.NearestFilter;
-colorTexture.magFilter = THREE.NearestFilter;
-//need compression of texture for GPU...
-// always use power of 2 resolution
-
-//jpg less to load but more for gpu so find the balance
-//like normal textures , we need exact coordinates so no blur.. so png is better
+const colorTexture = loader.load('/textures/door/color.jpg');
+const alphaTexture = loader.load('/textures/door/alpha.jpg');
+const heightTexture = loader.load('/textures/door/height.jpg');
+const normalTexture = loader.load('/textures/door/normal.jpg');
+const ambientOcclusionTexture = loader.load('/textures/door/ambientOcclusion.jpg');
+const metalnessTexture = loader.load('/textures/door/metalness.jpg');
+const roughnessTexture = loader.load('/textures/door/roughness.jpg');
+const gradTexture = loader.load('/gradien/3.jpg')
+const matTexture = loader.load('/matcaps/8.png')
 
 const gui = new dat.GUI();
 gui.hide();
@@ -53,45 +32,34 @@ const sizes = {
 	height: window.innerHeight
 };
 
-const cursor = {
-	x: undefined,
-	y: undefined
-};
-window.addEventListener('mousemove', (e) => {
-	cursor.x = e.clientX / sizes.width - 0.5;
-	cursor.y = -(e.clientY / sizes.height - 0.5);
-});
-
 const scene = new THREE.Scene();
 
 //object
 
-const geometry = new THREE.BoxBufferGeometry(1, 1, 1, 2, 2, 2);
 
-const material = new THREE.MeshBasicMaterial({
-	color: meshParams.color,
-	map: colorTexture
-});
+const material = new THREE.MeshBasicMaterial()
+material.map = colorTexture
+material.transparent = true;
+material.alphaMap = alphaTexture
+// material.side = THREE.BackSide
+material.side = THREE.DoubleSide
 
-const mesh = new THREE.Mesh(geometry, material);
 
-mesh.position.y = 1;
-scene.add(mesh);
+const sphere = new THREE.Mesh(
+	new THREE.SphereGeometry(.5,16,16), material);
 
-//debug
+const plane = new THREE.Mesh(
+	new THREE.PlaneGeometry(1,1) , material
+)
+const torus = new THREE.Mesh(
+	new THREE.TorusGeometry(.5,.2,16,32),
+	material
+)
 
-gui.add(mesh.position, 'y', -3, 3, 0.01);
-gui.add(mesh.position, 'x').min(-3).max(3).step(0.01);
-gui.add(mesh.position, 'z', -3, 3, 0.01).name('zPosition');
+sphere.position.x = -1.5
+torus.position.x = 1.5
 
-gui.add(mesh, 'visible');
-
-gui.add(material, 'wireframe');
-
-gui.addColor(meshParams, 'color').onChange(() => {
-	material.color = new THREE.Color(meshParams.color);
-});
-gui.add(meshParams, 'spin');
+scene.add(sphere , plane , torus);
 
 const camera = new THREE.PerspectiveCamera(60, sizes.width / sizes.height, 0.0001, 10000);
 camera.position.set(0, 0, 3);
@@ -115,7 +83,22 @@ controls.enableDamping = true; // friction
 controls.target.y = 1;
 controls.update();
 
+const clock = new THREE.Clock();
+
+
 const animate = () => {
+
+	const elapsedTime = clock.getElapsedTime();
+
+
+	sphere.rotation.y =  0.3 * elapsedTime;
+	plane.rotation.y = 0.3 * elapsedTime;
+	torus.rotation.y = 0.3 * elapsedTime;
+
+	sphere.rotation.x =  0.45 * elapsedTime;
+	plane.rotation.x = 0.45 * elapsedTime;
+	torus.rotation.x = .45 * elapsedTime;
+
 	controls.update(); // for damping
 	renderer.render(scene, camera);
 	window.requestAnimationFrame(animate);
@@ -130,7 +113,7 @@ const eventListeners = () => {
 		renderer.setSize(sizes.width, sizes.height);
 	});
 
-	window.addEventListener('dblclick', (e) => {
+window.addEventListener('dblclick', (e) => {
 		const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement;
 
 		if (!fullscreenElement) {
