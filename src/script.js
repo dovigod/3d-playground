@@ -15,7 +15,7 @@ const normalTexture = loader.load('/textures/door/normal.jpg');
 const ambientOcclusionTexture = loader.load('/textures/door/ambientOcclusion.jpg');
 const metalnessTexture = loader.load('/textures/door/metalness.jpg');
 const roughnessTexture = loader.load('/textures/door/roughness.jpg');
-const gradTexture = loader.load('/gradien/3.jpg')
+const gradTexture = loader.load('/gradients/3.jpg')
 const matTexture = loader.load('/matcaps/8.png')
 
 const gui = new dat.GUI();
@@ -37,21 +37,26 @@ const scene = new THREE.Scene();
 //object
 
 
-// const material = new THREE.MeshBasicMaterial()
-// material.map = colorTexture
-// material.transparent = true;
-// material.alphaMap = alphaTexture
-// // material.side = THREE.BackSide
-// material.side = THREE.DoubleSide 
+// const material = new THREE.MeshDepthMaterial()
+//camera close => white , far -> black
 
-// const material = new THREE.MeshNormalMaterial()
-// material.flatShading = true // new feature of normal material
 
-const material = new THREE.MeshMatcapMaterial()
-material.matcap = matTexture
-//will pick color inside texture and make it as normal
-//이용하면 카메라를 어디로 돌리든 같은 걸 볼수있으 
-//can make light similar without light
+// const material = new THREE.MeshLambertMaterial()
+// great performance, but problem on graphic like lines on sphere
+
+// const material = new THREE.MeshPhongMaterial()
+// // no strange pattern and reflection adapt
+// material.shininess = 1000
+// material.specular =  new THREE.Color(0x1188ff)// control light reflection color
+
+const material = new THREE.MeshToonMaterial() // like cartoon rendering
+material.gradientMap = gradTexture // this makes cartoonish disapear
+// cause, gradient is small and mag filter tries to fixit with mipmapping..a
+//so set min , mag fiter to nearestFilter  , or gradient texture .generatem'ipmapping false
+gradTexture.minFilter = THREE.NearestFilter
+gradTexture.magFilter = THREE.NearestFilter  // then ,cartoonish 
+gradTexture.generateMipmaps = false
+
 
 const sphere = new THREE.Mesh(
 	new THREE.SphereGeometry(.5,16,16), material);
@@ -69,9 +74,22 @@ torus.position.x = 1.5
 
 scene.add(sphere , plane , torus);
 
-const camera = new THREE.PerspectiveCamera(60, sizes.width / sizes.height, 0.0001, 10000);
-camera.position.set(0, 0, 3);
-camera.lookAt(0, 0, 0);
+
+
+//lights
+
+const ambientLight = new THREE.AmbientLight(0xffffff , 0.5)
+scene.add(ambientLight);
+
+const pointLight = new THREE.PointLight(0xffffff, 0.5)
+pointLight.position.x = 2
+pointLight.position.y = 3
+pointLight.position.z = 4
+scene.add(pointLight)
+
+const camera = new THREE.PerspectiveCamera(60, sizes.width / sizes.height, 0.1, 100);
+camera.position.set(1, 1, 2);
+
 scene.add(camera);
 
 //renderer
