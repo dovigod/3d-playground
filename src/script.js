@@ -30,17 +30,14 @@ const ambientOcclusionTexture = textureLoader.load('/textures/door/ambientOcclus
 const metalnessTexture = textureLoader.load('/textures/door/metalness.jpg');
 const roughnessTexture = textureLoader.load('/textures/door/roughnes.jpg');
 
-// minification happens when texture is smaller than original,, like zoom out, blurred points
-// mip mapping => size down untill 1x1
-//when too small... morie pattern occurs
-
 colorTexture.generateMipmaps = false;
 colorTexture.minFilter = THREE.NearestFilter;
+colorTexture.magFilter = THREE.NearestFilter;
+//need compression of texture for GPU...
+// always use power of 2 resolution
 
-//magnification filter => pixel gets stretched when texture is too small for it
-//gets blurred when stretched
-colorTexture.magFilter = THREE.NearestFilter; // gets sharp!!
-//**** nearest fillter gives better performance  when minification , nearest filter dont use mipmapping so cheaper */
+//jpg less to load but more for gpu so find the balance
+//like normal textures , we need exact coordinates so no blur.. so png is better
 
 const gui = new dat.GUI();
 gui.hide();
