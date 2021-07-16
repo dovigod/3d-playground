@@ -37,13 +37,21 @@ const scene = new THREE.Scene();
 //object
 
 
-const material = new THREE.MeshBasicMaterial()
-material.map = colorTexture
-material.transparent = true;
-material.alphaMap = alphaTexture
-// material.side = THREE.BackSide
-material.side = THREE.DoubleSide
+// const material = new THREE.MeshBasicMaterial()
+// material.map = colorTexture
+// material.transparent = true;
+// material.alphaMap = alphaTexture
+// // material.side = THREE.BackSide
+// material.side = THREE.DoubleSide 
 
+// const material = new THREE.MeshNormalMaterial()
+// material.flatShading = true // new feature of normal material
+
+const material = new THREE.MeshMatcapMaterial()
+material.matcap = matTexture
+//will pick color inside texture and make it as normal
+//이용하면 카메라를 어디로 돌리든 같은 걸 볼수있으 
+//can make light similar without light
 
 const sphere = new THREE.Mesh(
 	new THREE.SphereGeometry(.5,16,16), material);
