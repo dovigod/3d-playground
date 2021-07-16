@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"name": "threeJourney",
+			"path": ".."
+		}
+	],
+	"settings": {
+		"git.ignoreLimitWarning": true
+	}
+}
