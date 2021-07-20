@@ -20,7 +20,7 @@ const matTexture = loader.load('/matcaps/8.png')
 
 const gui = new dat.GUI();
 gui.hide();
-
+ 
 const meshParams = {
 	color: '#ffffff',
 	spin: () => {
@@ -37,42 +37,54 @@ const scene = new THREE.Scene();
 //object
 
 
-// const material = new THREE.MeshDepthMaterial()
-//camera close => white , far -> black
+const material = new THREE.MeshStandardMaterial();
+// more realistic , + metalness added , roughness added
+material.roughness =0.45
+material.metalness = .55
+material.map = colorTexture
+
+material.aoMap = ambientOcclusionTexture
+material.aoMapIntensity = 10
+material.displacementMap = heightTexture
 
 
-// const material = new THREE.MeshLambertMaterial()
-// great performance, but problem on graphic like lines on sphere
+gui.add(material , 'aoMapIntensity' , 0 , 10, 0.01)
+// must make other set of UV coord but three.js wont let us 	//texture 중첩
 
-// const material = new THREE.MeshPhongMaterial()
-// // no strange pattern and reflection adapt
-// material.shininess = 1000
-// material.specular =  new THREE.Color(0x1188ff)// control light reflection color
-
-const material = new THREE.MeshToonMaterial() // like cartoon rendering
-material.gradientMap = gradTexture // this makes cartoonish disapear
-// cause, gradient is small and mag filter tries to fixit with mipmapping..a
-//so set min , mag fiter to nearestFilter  , or gradient texture .generatem'ipmapping false
-gradTexture.minFilter = THREE.NearestFilter
-gradTexture.magFilter = THREE.NearestFilter  // then ,cartoonish 
-gradTexture.generateMipmaps = false
 
 
 const sphere = new THREE.Mesh(
 	new THREE.SphereGeometry(.5,16,16), material);
 
+	sphere.geometry.setAttribute('uv2' , new THREE.BufferAttribute(sphere.geometry.attributes.uv.array, 2));
+
+
 const plane = new THREE.Mesh(
 	new THREE.PlaneGeometry(1,1) , material
 )
+
+//console.log(plane.geometry)
+plane.geometry.setAttribute('uv2' , new THREE.BufferAttribute(plane.geometry.attributes.uv.array, 2));
+//tell buffer attribute how many data compos one vertex ==> 2
+
+
+
 const torus = new THREE.Mesh(
 	new THREE.TorusGeometry(.5,.2,16,32),
 	material
 )
 
+torus.geometry.setAttribute('uv2' , new THREE.BufferAttribute(torus.geometry.attributes.uv.array, 2));
+
+
+sphere.geometry.setAttribute('uv2' , new THREE.BufferAttribute(sphere.geometry.attributes.uv.array, 2));
+
+
 sphere.position.x = -1.5
 torus.position.x = 1.5
 
 scene.add(sphere , plane , torus);
+
 
 
 
@@ -101,6 +113,22 @@ const renderer = new THREE.WebGLRenderer({
 
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+
+//debug
+
+const materialFolder = gui.addFolder('material')
+materialFolder.add(material , 'metalness', 0 , 1 , 0.01)
+materialFolder.add(material , 'roughness', 0 , 1 , 0.01)
+materialFolder.addColor(meshParams, 'color').onChange( () =>{
+	material.color.set(meshParams.color)
+})
+materialFolder.add(material ,'transparent')
+materialFolder.add(material , 'opacity' , 0 , 1 , 0.01)
+materialFolder.add(material , 'wireframe');
+materialFolder.add(material , 'flatShading')
+
+
 
 //controls
 
