@@ -18,13 +18,29 @@ const roughnessTexture = loader.load('/textures/door/roughness.jpg');
 const gradTexture = loader.load('/gradients/3.jpg')
 const matTexture = loader.load('/matcaps/8.png')
 
+//for enviornment mapping
+
+const cubeLoader = new THREE.CubeTextureLoader();
+
+const enviornmentTexture = cubeLoader.load([
+'/environmentMaps/htrTexture/px.png',
+'/environmentMaps/htrTexture/nx.png',
+'/environmentMaps/htrTexture/py.png',
+'/environmentMaps/htrTexture/ny.png',
+'/environmentMaps/htrTexture/pz.png',
+'/environmentMaps/htrTexture/nz.png'])
+
+//need 6 parameter for up down right left forward back
+
 const gui = new dat.GUI();
 gui.hide();
  
 const meshParams = {
 	color: '#ffffff',
 	spin: () => {
-		gsap.to(mesh.rotation, { duration: 1, y: mesh.rotation.y + Math.PI * 2 });
+		gsap.to(plane.rotation, { duration: 1, y: plane.rotation.y + Math.PI * 2 });
+		gsap.to(sphere.rotation, { duration: 1, y: sphere.rotation.y + Math.PI * 2 });
+		gsap.to(torus.rotation, { duration: 1, y: torus.rotation.y + Math.PI * 2 });
 	}
 };
 const sizes = {
@@ -37,34 +53,18 @@ const scene = new THREE.Scene();
 //object
 
 
-const material = new THREE.MeshPhysicalMaterial();
-// more realistic , + metalness added , roughness added
-// material.roughness =0.45
-// material.metalness = .55
-material.map = colorTexture
+const material = new THREE.MeshStandardMaterial();
 
-material.aoMap = ambientOcclusionTexture
-material.aoMapIntensity = 1
-material.displacementMap = heightTexture
-material.displacementScale = 0.05
-material.metalnessMap = metalnessTexture
-material.roughnessMap = roughnessTexture
-material.normalMap = normalTexture
-material.normalScale.set(0.5,1.5)
-material.side = THREE.DoubleSide
-// details!!
-
-//metal . rogugh attributes will be combined with maps so disable it
-
-//plane -> no effect -> not enough vertices
-//1. adding more subdivision
-
-material.alphaMap = alphaTexture
-material.transparent = true
+material.metalness = 0.7;
+material.roughness = 0.2;
+material.envMap = enviornmentTexture
+// env reflection on material can be seen
 
 
-gui.add(material , 'displacementScale' , 0, 1 , 0.0001)
-gui.add(material , 'aoMapIntensity' , 0 , 10, 0.01)
+//three.js only supports cube map
+
+
+
 gui.add(material , 'wireframe')
 
 
@@ -100,6 +100,8 @@ torus.position.x = 1.5
 
 scene.add(sphere , plane , torus);
 
+
+gui.add(meshParams , 'spin')
 
 
 
@@ -156,18 +158,6 @@ const clock = new THREE.Clock();
 
 
 const animate = () => {
-
-	const elapsedTime = clock.getElapsedTime();
-
-
-	sphere.rotation.y =  0.3 * elapsedTime;
-	plane.rotation.y = 0.3 * elapsedTime;
-	torus.rotation.y = 0.3 * elapsedTime;
-
-	sphere.rotation.x =  0.45 * elapsedTime;
-	plane.rotation.x = 0.45 * elapsedTime;
-	torus.rotation.x = .45 * elapsedTime;
-
 	controls.update(); // for damping
 	renderer.render(scene, camera);
 	window.requestAnimationFrame(animate);
