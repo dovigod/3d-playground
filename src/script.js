@@ -37,7 +37,7 @@ const scene = new THREE.Scene();
 //object
 
 
-const material = new THREE.MeshStandardMaterial();
+const material = new THREE.MeshPhysicalMaterial();
 // more realistic , + metalness added , roughness added
 // material.roughness =0.45
 // material.metalness = .55
@@ -51,6 +51,7 @@ material.metalnessMap = metalnessTexture
 material.roughnessMap = roughnessTexture
 material.normalMap = normalTexture
 material.normalScale.set(0.5,1.5)
+material.side = THREE.DoubleSide
 // details!!
 
 //metal . rogugh attributes will be combined with maps so disable it
