@@ -39,38 +39,52 @@ const scene = new THREE.Scene();
 
 const material = new THREE.MeshStandardMaterial();
 // more realistic , + metalness added , roughness added
-material.roughness =0.45
-material.metalness = .55
+// material.roughness =0.45
+// material.metalness = .55
 material.map = colorTexture
 
 material.aoMap = ambientOcclusionTexture
-material.aoMapIntensity = 10
+material.aoMapIntensity = 1
 material.displacementMap = heightTexture
+material.displacementScale = 0.05
+material.metalnessMap = metalnessTexture
+material.roughnessMap = roughnessTexture
+material.normalMap = normalTexture
+material.normalScale.set(0.5,1.5)
+// details!!
+
+//metal . rogugh attributes will be combined with maps so disable it
+
+//plane -> no effect -> not enough vertices
+//1. adding more subdivision
+
+material.alphaMap = alphaTexture
+material.transparent = true
 
 
+gui.add(material , 'displacementScale' , 0, 1 , 0.0001)
 gui.add(material , 'aoMapIntensity' , 0 , 10, 0.01)
-// must make other set of UV coord but three.js wont let us 	//texture 중첩
+gui.add(material , 'wireframe')
+
 
 
 
 const sphere = new THREE.Mesh(
-	new THREE.SphereGeometry(.5,16,16), material);
+	new THREE.SphereGeometry(.5,16,16), material, 64 ,64);
 
 	sphere.geometry.setAttribute('uv2' , new THREE.BufferAttribute(sphere.geometry.attributes.uv.array, 2));
 
 
 const plane = new THREE.Mesh(
-	new THREE.PlaneGeometry(1,1) , material
+	new THREE.PlaneGeometry(1,1 ,100,100) , material
 )
 
-//console.log(plane.geometry)
 plane.geometry.setAttribute('uv2' , new THREE.BufferAttribute(plane.geometry.attributes.uv.array, 2));
-//tell buffer attribute how many data compos one vertex ==> 2
 
 
 
 const torus = new THREE.Mesh(
-	new THREE.TorusGeometry(.5,.2,16,32),
+	new THREE.TorusGeometry(.5,.2,64,128),
 	material
 )
 
