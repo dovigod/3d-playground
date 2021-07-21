@@ -53,7 +53,7 @@ fontLoader.load('/fonts/helvetiker_regular.typeface.json' , (font) =>{
 	
 	scene.add(text);
 	console.log('font loaded!')
-	gui.add(textMaterial , 'wireframe')
+
 	
 
 
@@ -80,11 +80,13 @@ const sizes = {
 
 //method 1
 
-for(let i = 0 ; i < 100 ; i ++){
-	const donutGeometry = new THREE.TorusBufferGeometry(0.3, 0.2 , 20 , 45);
+console.time('donut')
+const donutGeometry = new THREE.TorusBufferGeometry(0.3, 0.2 , 20 , 45);
 	const donutMateral = new THREE.MeshMatcapMaterial({
 		matcap : matcapTexture
 	});
+for(let i = 0 ; i < 100 ; i ++){
+	
 	const donut = new THREE.Mesh(donutGeometry , donutMateral)
 
 	donut.position.x = (Math.random() -0.5 )* 100 // normalize value !! usef!!
@@ -106,6 +108,10 @@ for(let i = 0 ; i < 100 ; i ++){
 
 	
 }
+console.timeEnd('donut')
+// 76ms ..  -> 322ms , 
+
+//use meshes , when making same multiple mesh , 
 
 
 
