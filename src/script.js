@@ -4,6 +4,12 @@ import gsap from 'gsap';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import * as dat from 'dat.gui';
 
+const scene = new THREE.Scene();
+
+//textures 
+const textureLoader = new THREE.TextureLoader()
+
+const matcapTexture = textureLoader.load('/matcaps/8.png')
 //fonts
 
 const fontLoader = new THREE.FontLoader();
@@ -15,27 +21,44 @@ fontLoader.load('/fonts/helvetiker_regular.typeface.json' , (font) =>{
 			font,
 			size: 0.5,
 			height:0.2, //depth of font
-			curveSegments: 12,
+			curveSegments: 5,
 			bevelEnabled: true,
-			bevelThickness : 0.03,
-			bevelSize: 0.02,
+			bevelThickness : 0.001, // 뽈록이, 많을수록 튀어나와
+			bevelSize: 0.02, 
 			bevelOffset: 0,
-			bevelSegments: 5
-
+			bevelSegments: 1,	 // 테두리.. 많을수록 둥글어
 		}
 	)
-	//bevel => round the font , text
+	// going to use bouning for frustum culling to let three.js caclulate geometries easily
+	textGeometry.computeBoundingBox()
+	//make Box3-> coordinates of box ,  
 
-	const textMaterial = new THREE.MeshBasicMaterial()
+	textGeometry.translate(
+		-((textGeometry.boundingBox.max.x-0.02) * 0.5), // bevel size
+		-((textGeometry.boundingBox.max.y-0.02) * 0.5), // bevelsize
+		-((textGeometry.boundingBox.max.z-0.03 )* 0.5)  //bevelthickness
+	)
+
+	textGeometry.computeBoundingBox()
+	//re computejust use below!!!!!!
+
+	// textGeometry.center()
+
+	//actually , 
+	
+	const textMaterial = new THREE.MeshMatcapMaterial({
+		matcap : matcapTexture
+	})
 	const text = new THREE.Mesh(textGeometry, textMaterial)
-	gui.add(textMaterial , 'wireframe')
+	
 	scene.add(text);
 	console.log('font loaded!')
+	gui.add(textMaterial , 'wireframe')
+	
+
+
+	
 })
-
-//textures 
-const textureLoader = new THREE.TextureLoader()
-
 //for enviornment mapping
 
 const cubeLoader = new THREE.CubeTextureLoader();
@@ -51,13 +74,43 @@ const sizes = {
 	height: window.innerHeight
 };
 
-const scene = new THREE.Scene();
 
+
+//donuts100 ; 
+
+//method 1
+
+for(let i = 0 ; i < 100 ; i ++){
+	const donutGeometry = new THREE.TorusBufferGeometry(0.3, 0.2 , 20 , 45);
+	const donutMateral = new THREE.MeshMatcapMaterial({
+		matcap : matcapTexture
+	});
+	const donut = new THREE.Mesh(donutGeometry , donutMateral)
+
+	donut.position.x = (Math.random() -0.5 )* 100 // normalize value !! usef!!
+	donut.position.y = (Math.random() -0.5 )* 100
+	donut.position.z = (Math.random() -0.5 )* 100
+
+
+	donut.rotation.x = Math.random() * Math.PI
+	donut.rotation.y = Math.random() * Math.PI
+	donut.rotation.z = Math.random() * Math.PI
+
+	const scale = (Math.random()+1)*4
+
+	donut.scale.x =scale;
+	donut.scale.y =scale;
+	donut.scale.z =scale;
+
+	scene.add(donut)
+
+	
+}
 
 
 
 const camera = new THREE.PerspectiveCamera(60, sizes.width / sizes.height, 0.1, 100);
-camera.position.set(1, 1, 2);
+camera.position.set(3, 3, 3);
 
 scene.add(camera);
 
