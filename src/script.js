@@ -14,6 +14,10 @@ const matcapTexture = textureLoader.load('/matcaps/8.png')
 
 const fontLoader = new THREE.FontLoader();
 //use callback in param
+
+const material = new THREE.MeshMatcapMaterial({
+	matcap : matcapTexture
+})
 fontLoader.load('/fonts/helvetiker_regular.typeface.json' , (font) =>{
 	const textGeometry = new THREE.TextBufferGeometry(
 		'Hello From Jisang',
@@ -46,10 +50,7 @@ fontLoader.load('/fonts/helvetiker_regular.typeface.json' , (font) =>{
 
 	//actually , 
 	
-	const textMaterial = new THREE.MeshMatcapMaterial({
-		matcap : matcapTexture
-	})
-	const text = new THREE.Mesh(textGeometry, textMaterial)
+	const text = new THREE.Mesh(textGeometry, material)
 	
 	scene.add(text);
 	console.log('font loaded!')
@@ -82,12 +83,10 @@ const sizes = {
 
 console.time('donut')
 const donutGeometry = new THREE.TorusBufferGeometry(0.3, 0.2 , 20 , 45);
-	const donutMateral = new THREE.MeshMatcapMaterial({
-		matcap : matcapTexture
-	});
+	
 for(let i = 0 ; i < 100 ; i ++){
 	
-	const donut = new THREE.Mesh(donutGeometry , donutMateral)
+	const donut = new THREE.Mesh(donutGeometry , material)
 
 	donut.position.x = (Math.random() -0.5 )* 100 // normalize value !! usef!!
 	donut.position.y = (Math.random() -0.5 )* 100
@@ -112,6 +111,7 @@ console.timeEnd('donut')
 // 76ms ..  -> 322ms , 
 
 //use meshes , when making same multiple mesh , 
+//-> to 5ms
 
 
 
