@@ -35,14 +35,34 @@ scene.add(torus);
 
 
 //light
-const ambientLight = new THREE.AmbientLight('#ffffff', 0.5)
-const pointLight = new THREE.PointLight('#ffffff',0.5)
-pointLight.position.x = 2
-pointLight.position.y = 3
-pointLight.position.z = 4
+//ambient light -> omnidirectional Light
+const ambientLight = new THREE.AmbientLight(0xffffff , 0.5);
+// scene.add(ambientLight);
+// const directionalLight = new THREE.DirectionalLight(0xffff2c , 0.5);
+// //works as sunlight , distance doesn't matter , light direction always center of scene ,, mostly use on global lighting
+// directionalLight.position.set( -2,1,2)
+// scene.add(directionalLight);
 
-scene.add(ambientLight)
-scene.add(pointLight)
+// const hemisphereLight = new THREE.HemisphereLight(0xff0000 ,0x0000ff);
+// // light1 on top , light 2 on bottom
+// scene.add(hemisphereLight)
+
+ const pointLight = new THREE.PointLight(0xff9000 , 0.5 , 10 , 2) // distance -> 영향권, decay -> 빛 소멸
+ pointLight.position.set(1 , -1 , 1)
+ scene.add(pointLight)
+// //will dim if face has larger angle agains light vectors
+// // for particular points
+
+const rectareaLight = new THREE.RectAreaLight(0x4e00ff , 0.5 ,2, 2)
+rectareaLight.position.set(0,-1, 0);
+//cool , 사진점 갔을때 부분 조명 느낌
+rectareaLight.lookAt(new THREE.Vector3())
+scene.add(rectareaLight)
+
+const spotLight = new THREE.SpotLight(0x00ff00 , 0.5 , 6 , Math.PI * 0.1 ,0.25 ,1);
+spotLight.position.set(1,1,1)
+scene.add(spotLight)
+
 
 
 
