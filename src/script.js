@@ -1,192 +1,125 @@
-import './style.css';
-import * as THREE from 'three';
-import gsap from 'gsap';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import * as dat from 'dat.gui';
+import './style.css'
+import * as THREE from 'three'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import * as dat from 'dat.gui'
 
-const scene = new THREE.Scene();
-
-const fontLoader = new THREE.FontLoader();
-const textureLoader = new THREE.TextureLoader();
-const backedShadow = textureLoader.load('/shadows/simpleShadow.jpg')
-
+/**
+ * Base
+ */
+// Debug
 const gui = new dat.GUI()
 
-//object
+// Canvas
+const canvas = document.querySelector('canvas.webgl')
 
-const material = new THREE.MeshStandardMaterial({
-	color:0xffffff,
-});
-material.roughness = 0.4
+// Scene
+const scene = new THREE.Scene()
 
-const plane = new THREE.Mesh(new THREE.PlaneGeometry(6,6), new THREE.MeshStandardMaterial({
-	color: 0xffffff
-}));
-plane.rotation.x= -Math.PI * 0.5
-plane.position.y = -1
-plane.receiveShadow = true
+/**
+ * Textures
+ */
+const textureLoader = new THREE.TextureLoader()
 
+/**
+ * House
+ */
+// Temporary sphere
+const sphere = new THREE.Mesh(
+    new THREE.SphereGeometry(1, 32, 32),
+    new THREE.MeshStandardMaterial({ roughness: 0.7 })
+)
+sphere.position.y = 1
+scene.add(sphere)
 
-const sphere = new THREE.Mesh(new THREE.SphereGeometry(.5,16,16) , material)
-sphere.castShadow = true
-scene.add(plane);
-scene.add(sphere);
+// Floor
+const floor = new THREE.Mesh(
+    new THREE.PlaneGeometry(20, 20),
+    new THREE.MeshStandardMaterial({ color: '#a9c388' })
+)
+floor.rotation.x = - Math.PI * 0.5
+floor.position.y = 0
+scene.add(floor)
 
-const sphereShadow  = new THREE.Mesh(new THREE.PlaneGeometry(1.5 , 1.5),
-new THREE.MeshBasicMaterial({
-	color: 0x000000,
-	alphaMap: backedShadow,
-	transparent : true
-}))
-sphereShadow.rotation.x = -Math.PI * 0.5;
-//sphereShadow.position.y = plane.position.y // z-fighting
-sphereShadow.position.y = plane.position.y + 0.01
-
-
-scene.add(sphereShadow)
-
-
-
-//lights
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.3)
-const directLight = new THREE.DirectionalLight(0xffffff , 0.3)
-directLight.position.set(2,2,-1)
-directLight.castShadow = true
-// optimization for graphic
-directLight.shadow.mapSize.width = 1024;
-directLight.shadow.mapSize.height = 1024;
-//use camera helper
-directLight.shadow.camera.near = 1
-directLight.shadow.camera.far = 5
-//since using orthgraphic cam , reduce l r f n b t
-directLight.shadow.camera.left = -2
-directLight.shadow.camera.right = 2
-directLight.shadow.camera.bottom = -2
-directLight.shadow.camera.top = 2
-
-//control blur
-
-directLight.shadow.radius = 10
-
-const spotLight = new THREE.SpotLight(0xffffff , 0.4 ,8, Math.PI * 0.2);
-spotLight.position.set(2,2,0)
-spotLight.castShadow = true
-spotLight.shadow.mapSize.width = 1024
-spotLight.shadow.mapSize.height = 1024
-spotLight.shadow.camera.near = 2
-spotLight.shadow.camera.far = 3.5
-spotLight.shadow.camera.fov = 30
-spotLight.shadow.camera.aspect = 1
-
-
-const dLight = gui.addFolder('dLight')
-dLight.add(directLight.position,'x',-5,5,0.001)
-dLight.add(directLight.position,'y',-5,5,0.001)
-dLight.add(directLight.position,'z',-5,5,0.001)
-dLight.add(directLight, 'intensity', 0 , 1 ,0.001)
-
-scene.add(directLight);
-
-
+/**
+ * Lights
+ */
+// Ambient light
+const ambientLight = new THREE.AmbientLight('#ffffff', 0.5)
+gui.add(ambientLight, 'intensity').min(0).max(1).step(0.001)
 scene.add(ambientLight)
-scene.add(spotLight)
-scene.add(spotLight.target)
 
-const slHelper = new THREE.CameraHelper(spotLight.shadow.camera)
-scene.add(slHelper)
+// Directional light
+const moonLight = new THREE.DirectionalLight('#ffffff', 0.5)
+moonLight.position.set(4, 5, - 2)
+gui.add(moonLight, 'intensity').min(0).max(1).step(0.001)
+gui.add(moonLight.position, 'x').min(- 5).max(5).step(0.001)
+gui.add(moonLight.position, 'y').min(- 5).max(5).step(0.001)
+gui.add(moonLight.position, 'z').min(- 5).max(5).step(0.001)
+scene.add(moonLight)
 
-
-
-
+/**
+ * Sizes
+ */
 const sizes = {
-	width: window.innerWidth,
-	height: window.innerHeight
+    width: window.innerWidth,
+    height: window.innerHeight
 }
 
-const camera = new THREE.PerspectiveCamera(60, sizes.width / sizes.height, 0.1, 100);
-camera.position.set(3, 3, 3);
-scene.add(camera);
+window.addEventListener('resize', () =>
+{
+    // Update sizes
+    sizes.width = window.innerWidth
+    sizes.height = window.innerHeight
 
-//renderer
+    // Update camera
+    camera.aspect = sizes.width / sizes.height
+    camera.updateProjectionMatrix()
 
-const canvas = document.querySelector('.webgl');
+    // Update renderer
+    renderer.setSize(sizes.width, sizes.height)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+})
+
+/**
+ * Camera
+ */
+// Base camera
+const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
+camera.position.x = 4
+camera.position.y = 2
+camera.position.z = 5
+scene.add(camera)
+
+// Controls
+const controls = new OrbitControls(camera, canvas)
+controls.enableDamping = true
+
+/**
+ * Renderer
+ */
 const renderer = new THREE.WebGLRenderer({
-	canvas: canvas
-});
+    canvas: canvas
+})
+renderer.setSize(sizes.width, sizes.height)
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
-renderer.shadowMap.enabled = false // essential to create shadowmap
+/**
+ * Animate
+ */
+const clock = new THREE.Clock()
 
-renderer.setSize(sizes.width, sizes.height);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-//control type algorithym
-renderer.shadowMap.type = THREE.PCFSoftShadowMap // radius unsupport
+const tick = () =>
+{
+    const elapsedTime = clock.getElapsedTime()
 
+    // Update controls
+    controls.update()
 
+    // Render
+    renderer.render(scene, camera)
 
+    // Call tick again on the next frame
+    window.requestAnimationFrame(tick)
+}
 
-//controls
-
-const controls = new OrbitControls(camera, canvas);
-controls.enableDamping = true; // friction
-controls.target.y = 1;
-controls.update();
-
-const clock = new THREE.Clock();
-const animate = () => {
-
-	const elapsedTime = clock.getElapsedTime()
-	//update Sphere
-	sphere.position.x = Math.cos(elapsedTime)* 1.5
-	sphere.position.z = Math.sin(elapsedTime)* 1.5
-	sphere.position.y = Math.abs(Math.sin(elapsedTime * 3))
-	//update Shadow
-	sphereShadow.position.x = Math.cos(elapsedTime)* 1.5
-	sphereShadow.position.z = Math.sin(elapsedTime)* 1.5
-	sphereShadow.material.opacity = (1 - Math.abs(sphere.position.y)) * 0.3
-	
-
-
-
-	
-	controls.update(); // for damping
-	renderer.render(scene, camera);
-	window.requestAnimationFrame(animate);
-};
-
-
-
-const eventListeners = () => {
-	window.addEventListener('resize', (e) => {
-		sizes.width = window.innerWidth;
-		sizes.height = window.innerHeight;
-		camera.aspect = sizes.width / sizes.height;
-		camera.updateProjectionMatrix();
-		renderer.setSize(sizes.width, sizes.height);
-	});
-
-
-
-window.addEventListener('dblclick', (e) => {
-		const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement;
-
-		if (!fullscreenElement) {
-			if (canvas.requestFullscreen) {
-				canvas.requestFullscreen();
-			} else if (canvas.webkitFullscreen) {
-				canvas.webkitRequestFullscreen();
-			}
-			// not on safari
-		} else {
-			if (document.exitFullscreen) {
-				document.exitFullscreen();
-			} else if (document.webkitExitFullscreen) {
-				document.webkitExitFullscreen();
-			}
-
-			console.log('exit fullscreen');
-		}
-	});
-};
-
-eventListeners();
-animate();
+tick()
