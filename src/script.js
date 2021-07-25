@@ -28,8 +28,8 @@ scene.add(sphere);
 
 
 //lights
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
-const directLight = new THREE.DirectionalLight(0xffffff , 0.5)
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.3)
+const directLight = new THREE.DirectionalLight(0xffffff , 0.3)
 directLight.position.set(2,2,-1)
 directLight.castShadow = true
 // optimization for graphic
@@ -48,9 +48,17 @@ directLight.shadow.camera.top = 2
 
 directLight.shadow.radius = 10
 
-const spotLight = new THREE.SpotLight(0xffffff , 0.5 );
-spotLight.position.set(2,3,4)
+const spotLight = new THREE.SpotLight(0xffffff , 0.4 ,8, Math.PI * 0.2);
+spotLight.position.set(2,2,0)
 spotLight.castShadow = true
+spotLight.shadow.mapSize.width = 1024
+spotLight.shadow.mapSize.height = 1024
+spotLight.shadow.camera.near = 2
+spotLight.shadow.camera.far = 3.5
+spotLight.shadow.camera.fov = 30
+spotLight.shadow.camera.aspect = 1
+
+
 const dLight = gui.addFolder('dLight')
 dLight.add(directLight.position,'x',-5,5,0.001)
 dLight.add(directLight.position,'y',-5,5,0.001)
@@ -62,6 +70,10 @@ scene.add(directLight);
 
 scene.add(ambientLight)
 scene.add(spotLight)
+scene.add(spotLight.target)
+
+const slHelper = new THREE.CameraHelper(spotLight.shadow.camera)
+scene.add(slHelper)
 
 
 
@@ -86,6 +98,8 @@ renderer.shadowMap.enabled = true // essential to create shadowmap
 
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+//control type algorithym
+renderer.shadowMap.type = THREE.PCFSoftShadowMap // radius unsupport
 
 
 
