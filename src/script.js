@@ -8,7 +8,7 @@ const scene = new THREE.Scene();
 
 const fontLoader = new THREE.FontLoader();
 const textureLoader = new THREE.TextureLoader();
-const backedShadow = textureLoader.load('/shadows/bakedShadow.jpg')
+const backedShadow = textureLoader.load('/shadows/simpleShadow.jpg')
 
 const gui = new dat.GUI()
 
@@ -19,9 +19,8 @@ const material = new THREE.MeshStandardMaterial({
 });
 material.roughness = 0.4
 
-const plane = new THREE.Mesh(new THREE.PlaneGeometry(3,3), new THREE.MeshStandardMaterial({
-	color: 0xffffff,
-	map: backedShadow
+const plane = new THREE.Mesh(new THREE.PlaneGeometry(6,6), new THREE.MeshStandardMaterial({
+	color: 0xffffff
 }));
 plane.rotation.x= -Math.PI * 0.5
 plane.position.y = -1
@@ -32,6 +31,19 @@ const sphere = new THREE.Mesh(new THREE.SphereGeometry(.5,16,16) , material)
 sphere.castShadow = true
 scene.add(plane);
 scene.add(sphere);
+
+const sphereShadow  = new THREE.Mesh(new THREE.PlaneGeometry(1.5 , 1.5),
+new THREE.MeshBasicMaterial({
+	color: 0x000000,
+	alphaMap: backedShadow,
+	transparent : true
+}))
+sphereShadow.rotation.x = -Math.PI * 0.5;
+//sphereShadow.position.y = plane.position.y // z-fighting
+sphereShadow.position.y = plane.position.y + 0.01
+
+
+scene.add(sphereShadow)
 
 
 
@@ -111,6 +123,7 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap // radius unsupport
 
 
 
+
 //controls
 
 const controls = new OrbitControls(camera, canvas);
@@ -122,6 +135,17 @@ const clock = new THREE.Clock();
 const animate = () => {
 
 	const elapsedTime = clock.getElapsedTime()
+	//update Sphere
+	sphere.position.x = Math.cos(elapsedTime)* 1.5
+	sphere.position.z = Math.sin(elapsedTime)* 1.5
+	sphere.position.y = Math.abs(Math.sin(elapsedTime * 3))
+	//update Shadow
+	sphereShadow.position.x = Math.cos(elapsedTime)* 1.5
+	sphereShadow.position.z = Math.sin(elapsedTime)* 1.5
+	sphereShadow.material.opacity = (1 - Math.abs(sphere.position.y)) * 0.3
+	
+
+
 
 	
 	controls.update(); // for damping
