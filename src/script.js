@@ -7,18 +7,26 @@ import * as dat from 'dat.gui';
 const scene = new THREE.Scene();
 
 const fontLoader = new THREE.FontLoader();
+const textureLoader = new THREE.TextureLoader();
+const backedShadow = textureLoader.load('/shadows/bakedShadow.jpg')
 
 const gui = new dat.GUI()
 
 //object
 
-const material = new THREE.MeshStandardMaterial({color:0xffffff});
+const material = new THREE.MeshStandardMaterial({
+	color:0xffffff,
+});
 material.roughness = 0.4
 
-const plane = new THREE.Mesh(new THREE.PlaneGeometry(3,3), material);
+const plane = new THREE.Mesh(new THREE.PlaneGeometry(3,3), new THREE.MeshStandardMaterial({
+	color: 0xffffff,
+	map: backedShadow
+}));
 plane.rotation.x= -Math.PI * 0.5
 plane.position.y = -1
 plane.receiveShadow = true
+
 
 const sphere = new THREE.Mesh(new THREE.SphereGeometry(.5,16,16) , material)
 sphere.castShadow = true
@@ -94,7 +102,7 @@ const renderer = new THREE.WebGLRenderer({
 	canvas: canvas
 });
 
-renderer.shadowMap.enabled = true // essential to create shadowmap
+renderer.shadowMap.enabled = false // essential to create shadowmap
 
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
