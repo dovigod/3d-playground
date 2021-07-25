@@ -8,6 +8,7 @@ const scene = new THREE.Scene();
 
 const fontLoader = new THREE.FontLoader();
 
+const gui = new dat.GUI()
 
 //object
 
@@ -17,50 +18,33 @@ material.roughness = 0.4
 const plane = new THREE.Mesh(new THREE.PlaneGeometry(3,3), material);
 plane.rotation.x= -Math.PI * 0.5
 plane.position.y = -1
+plane.receiveShadow = true
 
 const sphere = new THREE.Mesh(new THREE.SphereGeometry(.5,16,16) , material)
-sphere.position.set(-1.5,0,0);
-
-const cube = new THREE.Mesh(new THREE.BoxGeometry(1,1,1) , material)
-
-const torus = new THREE.Mesh(
-    new THREE.TorusGeometry(0.3, 0.2, 32, 64),
-    material
-)
-torus.position.x = 1.5
+sphere.castShadow = true
 scene.add(plane);
 scene.add(sphere);
-scene.add(cube);
-scene.add(torus);
 
 
-//light
-//ambient light -> omnidirectional Light
-const ambientLight = new THREE.AmbientLight(0xffffff , 0.5);
-// scene.add(ambientLight);
-// const directionalLight = new THREE.DirectionalLight(0xffff2c , 0.5);
-// //works as sunlight , distance doesn't matter , light direction always center of scene ,, mostly use on global lighting
-// directionalLight.position.set( -2,1,2)
-// scene.add(directionalLight);
 
-// const hemisphereLight = new THREE.HemisphereLight(0xff0000 ,0x0000ff);
-// // light1 on top , light 2 on bottom
-// scene.add(hemisphereLight)
+//lights
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
+const directLight = new THREE.DirectionalLight(0xffffff , 0.5)
+directLight.position.set(2,2,-1)
+directLight.castShadow = true
+const spotLight = new THREE.SpotLight(0xffffff , 0.5 );
+spotLight.position.set(2,3,4)
+spotLight.castShadow = true
+const dLight = gui.addFolder('dLight')
+dLight.add(directLight.position,'x',-5,5,0.001)
+dLight.add(directLight.position,'y',-5,5,0.001)
+dLight.add(directLight.position,'z',-5,5,0.001)
+dLight.add(directLight, 'intensity', 0 , 1 ,0.001)
 
- const pointLight = new THREE.PointLight(0xff9000 , 0.5 , 10 , 2) // distance -> 영향권, decay -> 빛 소멸
- pointLight.position.set(1 , -1 , 1)
- scene.add(pointLight)
-// //will dim if face has larger angle agains light vectors
-// // for particular points
+scene.add(directLight);
 
-const rectareaLight = new THREE.RectAreaLight(0x4e00ff , 0.5 ,2, 2)
-rectareaLight.position.set(0,-1, 0);
-//cool , 사진점 갔을때 부분 조명 느낌
-rectareaLight.lookAt(new THREE.Vector3())
-scene.add(rectareaLight)
 
-const spotLight = new THREE.SpotLight(0x00ff00 , 0.5 , 6 , Math.PI * 0.1 ,0.25 ,1);
-spotLight.position.set(1,1,1)
+scene.add(ambientLight)
 scene.add(spotLight)
 
 
@@ -82,6 +66,8 @@ const renderer = new THREE.WebGLRenderer({
 	canvas: canvas
 });
 
+renderer.shadowMap.enabled = true // essential to create shadowmap
+
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
@@ -99,15 +85,7 @@ const animate = () => {
 
 	const elapsedTime = clock.getElapsedTime()
 
-	cube.rotation.x = elapsedTime * Math.PI * 0.2
-	cube.rotation.y = elapsedTime * Math.PI * 0.4
-	cube.rotation.z = elapsedTime * Math.PI * 0.6
-
-	torus.rotation.x = elapsedTime * Math.PI * 0.2
-	torus.rotation.y = elapsedTime * Math.PI * 0.4
-	torus.rotation.z = elapsedTime * Math.PI * 0.6
-
-
+	
 	controls.update(); // for damping
 	renderer.render(scene, camera);
 	window.requestAnimationFrame(animate);
