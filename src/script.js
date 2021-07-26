@@ -43,6 +43,8 @@ const particleMaterial = new THREE.PointsMaterial({
 	blending : THREE.AdditiveBlending, // 색깔 겹치면 색깔 섞어줌 // may have impact performance,
 	vertexColors : true
 })
+// to improve performance, need to use customize shader
+
 const particles = new THREE.Points(particleGeometry , particleMaterial)
 scene.add(particles)
 
