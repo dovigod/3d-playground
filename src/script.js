@@ -20,11 +20,14 @@ const scene = new THREE.Scene()
 //galaxy
 const parameters = {
 	count : 1000,
-	size : 0.02,
+	size : 0.01,
 	radius: 5,
 	branch: 3,
 	spin: 1,
-	randomness : 0.02
+	randomness : 0.2,
+	randomnessPow : 3,
+	insideColor: '#ff5588',
+	outsideColor : '#8855ff'
 }
 let particlesGeometry = null
 let particlesMaterial = null
@@ -39,28 +42,53 @@ const generateGalaxy = () => {
 
 	particlesGeometry = new THREE.BufferGeometry()
 	const positions = new Float32Array(parameters.count * 3)
+	const colors = new Float32Array(parameters.count * 3)
+
+	//base color
+
+	const colorInside = new THREE.Color(parameters.insideColor);
+	const colorOutside = new THREE.Color(parameters.outsideColor);
+
+
 	for( let i = 0 ; i < parameters.count ; i ++){
 		const i3 = i*3
+
+		//positions
 		const radius = (Math.random()) * parameters.radius
 		const branchesAngle = ((i % parameters.branch) / parameters.branch) * Math.PI * 2
 		const spinAngle = radius * parameters.spin
 
-		const randomX = (Math.random() - 0.5) * parameters.randomness
-		const randomY = (Math.random() - 0.5) * parameters.randomness
-		const randomZ = (Math.random() - 0.5) * parameters.randomness
+		const randomX = Math.pow(( Math.random()) , parameters.randomnessPow)  * (Math.random() < 0.5 ? 1 : - 1)
+		const randomY = Math.pow(( Math.random()) , parameters.randomnessPow) * (Math.random() < 0.5 ? 1 : - 1)
+		const randomZ = Math.pow(( Math.random()) , parameters.randomnessPow) * (Math.random() < 0.5 ? 1 : - 1)
 
-		positions[i3] = radius * Math.cos(branchesAngle + spinAngle) + randomX
+		positions[i3] = radius * Math.cos(branchesAngle + spinAngle) + randomX 
 		positions[i3+1] = randomY
 		positions[i3+2] = radius * Math.sin(branchesAngle + spinAngle) + randomZ
+
+		//color
+		const mixedColor = colorInside.clone()
+		mixedColor.lerp(colorOutside , radius / parameters.radius)
+		colors[i3 + 0] = mixedColor.r
+		colors[i3 + 1] = mixedColor.g
+		colors[i3 + 2] = mixedColor.b
+
 	}
+	particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
 	particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+
+	
+	//lerp
+
+	colorInside.lerp(colorOutside , 0.5)
 
 	// material
 	particlesMaterial = new THREE.PointsMaterial({
 		size: parameters.size,
 		sizeAttenuation: true,
 		depthWrite: false,
-		blending: THREE.AdditiveBlending
+		blending: THREE.AdditiveBlending,
+		vertexColors: true
 	})
 	points = new THREE.Points(particlesGeometry , particlesMaterial)
 	scene.add(points)
@@ -132,9 +160,14 @@ gui.add(parameters ,'spin' , -5 , 5 , 1).onFinishChange(() => {
 	generateGalaxy()
 })
 
-gui.add(parameters ,'randomness' , 0, 3 , 0.01).onFinishChange(() => {
+gui.add(parameters ,'randomness' , 0, 20 , 0.01).onFinishChange(() => {
 	generateGalaxy()
 })
+gui.add(parameters ,'randomnessPow' , 1, 10 , 0.001).onFinishChange(() => {
+	generateGalaxy()
+})
+gui.addColor(parameters, 'insideColor')
+gui.addColor(parameters, 'outsideColor')
 
 //problem , we are generating new galaxy, but not destroying old ones
 
