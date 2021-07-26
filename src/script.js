@@ -16,37 +16,13 @@ const canvas = document.querySelector('canvas.webgl')
 const scene = new THREE.Scene()
 
 /**
- * Textures
+ * Test cube
  */
-const textureLoader = new THREE.TextureLoader()
-const particleTexture = textureLoader.load('/particles/2.png')
-
-//particle
-const particleGeometry = new THREE.BufferGeometry()
-const count = 20000
-
-const vertices = new Float32Array(count * 3)
-const colors = new Float32Array(count * 3)
-for(let i = 0 ; i < count * 3 ; i ++){
-	vertices[i] = (Math.random()- 0.5) * 5
-	colors[i] = Math.random()
-}
-particleGeometry.setAttribute('position' , new THREE.BufferAttribute(vertices , 3))
-particleGeometry.setAttribute('color' , new THREE.BufferAttribute(colors , 3))
-const particleMaterial = new THREE.PointsMaterial({
-	size: 0.02,
-	sizeAttenuation: true, // if particle is far , small , near =-> big // get small dots, regardless of distance
-	// color: '#ff99cc',
-	transparent: true,
-	alphaMap: particleTexture,
-	depthWrite: false,
-	blending : THREE.AdditiveBlending, // 색깔 겹치면 색깔 섞어줌 // may have impact performance,
-	vertexColors : true
-})
-// to improve performance, need to use customize shader
-
-const particles = new THREE.Points(particleGeometry , particleMaterial)
-scene.add(particles)
+const cube = new THREE.Mesh(
+    new THREE.BoxGeometry(1, 1, 1),
+    new THREE.MeshBasicMaterial()
+)
+scene.add(cube)
 
 /**
  * Sizes
@@ -76,6 +52,8 @@ window.addEventListener('resize', () =>
  */
 // Base camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
+camera.position.x = 3
+camera.position.y = 3
 camera.position.z = 3
 scene.add(camera)
 
@@ -99,17 +77,7 @@ const clock = new THREE.Clock()
 
 const tick = () =>
 {
-	const elapsedTime = clock.getElapsedTime()
-	
-	//particles.rotation.y  = elapsedTime * 0.2
-	
-	//control each particle
-	for(let i = 0 ; i <count ; i++){
-		const i3 = i*3
-		const x = particleGeometry.attributes.position.array[i3]
-		particleGeometry.attributes.position.array[i3 + 1] = Math.sin(elapsedTime + x)
-	}
-	particleGeometry.attributes.position.needsUpdate = true;
+    const elapsedTime = clock.getElapsedTime()
 
     // Update controls
     controls.update()
