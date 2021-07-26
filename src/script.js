@@ -7,7 +7,9 @@ import * as dat from 'dat.gui'
  * Base
  */
 // Debug
-const gui = new dat.GUI()
+const gui = new dat.GUI({
+	width: 360
+})
 
 // Canvas
 const canvas = document.querySelector('canvas.webgl')
@@ -15,14 +17,45 @@ const canvas = document.querySelector('canvas.webgl')
 // Scene
 const scene = new THREE.Scene()
 
-/**
- * Test cube
- */
-const cube = new THREE.Mesh(
-    new THREE.BoxGeometry(1, 1, 1),
-    new THREE.MeshBasicMaterial()
-)
-scene.add(cube)
+//galaxy
+const parameters = {
+	count : 1000,
+	size : 0.02
+}
+
+let particlesGeometry = null
+let particlesMaterial = null
+let points = null
+const generateGalaxy = () => {
+
+	if(points !== null){
+		particlesGeometry.dispose()
+		particlesMaterial.dispose()
+		scene.remove(points)
+	}
+
+	particlesGeometry = new THREE.BufferGeometry()
+	const positions = new Float32Array(parameters.count * 3)
+	for( let i = 0 ; i < parameters.count ; i ++){
+		const i3 = i*3
+		positions[i3] = (Math.random() - 0.5) * 3
+		positions[i3+1] = (Math.random() - 0.5) * 3
+		positions[i3+2] = (Math.random() - 0.5) * 3
+	}
+	particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+
+	// material
+	particlesMaterial = new THREE.PointsMaterial({
+		size: parameters.size,
+		sizeAttenuation: true,
+		depthWrite: false,
+		blending: THREE.AdditiveBlending
+	})
+	points = new THREE.Points(particlesGeometry , particlesMaterial)
+	scene.add(points)
+
+
+}
 
 /**
  * Sizes
@@ -69,6 +102,14 @@ const renderer = new THREE.WebGLRenderer({
 })
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+//dat.gui
+gui.add(parameters,'count' , 100 , 100000 , 10).onFinishChange(( )=> {
+	generateGalaxy()
+})
+gui.add(parameters ,'size' , 0.001 , 0.1 , 0.001).onFinishChange(() => {
+	generateGalaxy()
+})
+//problem , we are generating new galaxy, but not destroying old ones
 
 /**
  * Animate
@@ -90,3 +131,5 @@ const tick = () =>
 }
 
 tick()
+
+generateGalaxy()
