@@ -20,9 +20,12 @@ const scene = new THREE.Scene()
 //galaxy
 const parameters = {
 	count : 1000,
-	size : 0.02
+	size : 0.02,
+	radius: 5,
+	branch: 3,
+	spin: 1,
+	randomness : 0.02
 }
-
 let particlesGeometry = null
 let particlesMaterial = null
 let points = null
@@ -38,9 +41,17 @@ const generateGalaxy = () => {
 	const positions = new Float32Array(parameters.count * 3)
 	for( let i = 0 ; i < parameters.count ; i ++){
 		const i3 = i*3
-		positions[i3] = (Math.random() - 0.5) * 3
-		positions[i3+1] = (Math.random() - 0.5) * 3
-		positions[i3+2] = (Math.random() - 0.5) * 3
+		const radius = (Math.random()) * parameters.radius
+		const branchesAngle = ((i % parameters.branch) / parameters.branch) * Math.PI * 2
+		const spinAngle = radius * parameters.spin
+
+		const randomX = (Math.random() - 0.5) * parameters.randomness
+		const randomY = (Math.random() - 0.5) * parameters.randomness
+		const randomZ = (Math.random() - 0.5) * parameters.randomness
+
+		positions[i3] = radius * Math.cos(branchesAngle + spinAngle) + randomX
+		positions[i3+1] = randomY
+		positions[i3+2] = radius * Math.sin(branchesAngle + spinAngle) + randomZ
 	}
 	particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
 
@@ -109,6 +120,22 @@ gui.add(parameters,'count' , 100 , 100000 , 10).onFinishChange(( )=> {
 gui.add(parameters ,'size' , 0.001 , 0.1 , 0.001).onFinishChange(() => {
 	generateGalaxy()
 })
+gui.add(parameters ,'radius' , 0.01 , 20 , 0.01).onFinishChange(() => {
+	generateGalaxy()
+})
+
+gui.add(parameters ,'branch' , 3 , 10 , 1).onFinishChange(() => {
+	generateGalaxy()
+})
+
+gui.add(parameters ,'spin' , -5 , 5 , 1).onFinishChange(() => {
+	generateGalaxy()
+})
+
+gui.add(parameters ,'randomness' , 0, 3 , 0.01).onFinishChange(() => {
+	generateGalaxy()
+})
+
 //problem , we are generating new galaxy, but not destroying old ones
 
 /**
