@@ -4,11 +4,13 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'dat.gui'
 
 /**
- * Base
+ * Debug
  */
-// Debug
 const gui = new dat.GUI()
 
+/**
+ * Base
+ */
 // Canvas
 const canvas = document.querySelector('canvas.webgl')
 
@@ -16,32 +18,67 @@ const canvas = document.querySelector('canvas.webgl')
 const scene = new THREE.Scene()
 
 /**
- * Objects
+ * Textures
  */
-const object1 = new THREE.Mesh(
-    new THREE.SphereGeometry(0.5, 16, 16),
-    new THREE.MeshBasicMaterial({ color: '#ff0000' })
-)
-object1.position.x = - 2
+const textureLoader = new THREE.TextureLoader()
+const cubeTextureLoader = new THREE.CubeTextureLoader()
 
-const object2 = new THREE.Mesh(
-    new THREE.SphereGeometry(0.5, 16, 16),
-    new THREE.MeshBasicMaterial({ color: '#ff0000' })
-)
-
-const object3 = new THREE.Mesh(
-    new THREE.SphereGeometry(0.5, 16, 16),
-    new THREE.MeshBasicMaterial({ color: '#ff0000' })
-)
-object3.position.x = 2
-
-scene.add(object1,object2,object3)
+const environmentMapTexture = cubeTextureLoader.load([
+    '/textures/environmentMaps/0/px.png',
+    '/textures/environmentMaps/0/nx.png',
+    '/textures/environmentMaps/0/py.png',
+    '/textures/environmentMaps/0/ny.png',
+    '/textures/environmentMaps/0/pz.png',
+    '/textures/environmentMaps/0/nz.png'
+])
 
 /**
- * raycasters
+ * Test sphere
  */
+const sphere = new THREE.Mesh(
+    new THREE.SphereGeometry(0.5, 32, 32),
+    new THREE.MeshStandardMaterial({
+        metalness: 0.3,
+        roughness: 0.4,
+        envMap: environmentMapTexture
+    })
+)
+sphere.castShadow = true
+sphere.position.y = 0.5
+scene.add(sphere)
 
- const raycaster = new THREE.Raycaster()
+/**
+ * Floor
+ */
+const floor = new THREE.Mesh(
+    new THREE.PlaneGeometry(10, 10),
+    new THREE.MeshStandardMaterial({
+        color: '#777777',
+        metalness: 0.3,
+        roughness: 0.4,
+        envMap: environmentMapTexture
+    })
+)
+floor.receiveShadow = true
+floor.rotation.x = - Math.PI * 0.5
+scene.add(floor)
+
+/**
+ * Lights
+ */
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.7)
+scene.add(ambientLight)
+
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.2)
+directionalLight.castShadow = true
+directionalLight.shadow.mapSize.set(1024, 1024)
+directionalLight.shadow.camera.far = 15
+directionalLight.shadow.camera.left = - 7
+directionalLight.shadow.camera.top = 7
+directionalLight.shadow.camera.right = 7
+directionalLight.shadow.camera.bottom = - 7
+directionalLight.position.set(5, 5, 5)
+scene.add(directionalLight)
 
 /**
  * Sizes
@@ -71,7 +108,7 @@ window.addEventListener('resize', () =>
  */
 // Base camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
-camera.position.z = 3
+camera.position.set(- 3, 3, 3)
 scene.add(camera)
 
 // Controls
@@ -84,6 +121,8 @@ controls.enableDamping = true
 const renderer = new THREE.WebGLRenderer({
     canvas: canvas
 })
+renderer.shadowMap.enabled = true
+renderer.shadowMap.type = THREE.PCFSoftShadowMap
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
@@ -92,43 +131,11 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
  */
 const clock = new THREE.Clock()
 
-let currentIntersect = null
-
-//mouse
-const mouse = new THREE.Vector2()
-window.addEventListener('mousemove' , (e) =>{
-	mouse.x = e.clientX / sizes.width * 2 -1 
-	mouse.y = -(e.clientY / sizes.height) * 2 + 1
-})
 const tick = () =>
 {
     const elapsedTime = clock.getElapsedTime()
 
-	//animate
-	object1.position.y = Math.sin(elapsedTime * 0.3) * 1.5
-	object2.position.y = Math.sin(elapsedTime * 0.6) * 1.5
-	object3.position.y = Math.sin(elapsedTime * 0.4) * 1.5
-
-	//raycaster
-
-	raycaster.setFromCamera(mouse, camera)
-	// const rayOrigin = new THREE.Vector3(-3,0,0)
-	// const rayDirection = new THREE.Vector3(10,0,0) //should be normalized
-	// rayDirection.normalize()
-	// raycaster.set(rayOrigin, rayDirection)
-	const testing = [object1,object2,object3]
-    const intersects = raycaster.intersectObjects(testing) // use 's' even if u use single obj
-	
-	for(const object of testing){
-		object.material.color = new THREE.Color('#ff0000')
-	}
-	
-	for(const intersect of intersects){
-		intersect.object.material.color = new THREE.Color('#0000ff')
-	}
-	
-	
-	// Update controls
+    // Update controls
     controls.update()
 
     // Render
@@ -137,4 +144,5 @@ const tick = () =>
     // Call tick again on the next frame
     window.requestAnimationFrame(tick)
 }
+
 tick()
