@@ -38,16 +38,38 @@ physics
 const world = new CANNON.World(); // 1. create world
 world.gravity.set(0, -9.82, 0); // type vec3 not vector3
 
+// material
+
+const concreteMaterial = new CANNON.Material('concrete');
+const plasticMaterial = new CANNON.Material('plastic');
+//friction , restitution etc..
+const concretePlasticContactMaterial = new CANNON.ContactMaterial(concreteMaterial, plasticMaterial, {
+	friction: 0.1,
+	restitution: 0.7
+});
+
+world.addContactMaterial(concretePlasticContactMaterial);
+
 //sphere
 const sphereShape = new CANNON.Sphere(0.5);
 const sphereBody = new CANNON.Body({
 	mass: 1,
 	position: new CANNON.Vec3(0, 3, 0),
-	shape: sphereShape
+	shape: sphereShape,
+	material: plasticMaterial
 });
 
 world.add(sphereBody);
 
+//plane
+const floorShape = new CANNON.Plane();
+const floorBody = new CANNON.Body();
+floorBody.material = concreteMaterial;
+floorBody.mass = 0; // setting to 0 => static
+floorBody.addShape(floorShape);
+//cannor.js only supports quaternion
+floorBody.quaternion.setFromAxisAngle(new CANNON.Vec3(-1, 0, 0), Math.PI * 0.5); // 1. axis , 2.an gle
+world.addBody(floorBody);
 /**
  * Test sphere
  */
