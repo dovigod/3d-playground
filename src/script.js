@@ -8,6 +8,17 @@ import CANNON from 'cannon';
  * Debug
  */
 const gui = new dat.GUI();
+const debugObj = {};
+
+debugObj.createSphere = () => {
+	createSphere(Math.random() * 0.5, {
+		x: (Math.random() - 0.5) * 3,
+		y: 3,
+		z: (Math.random() - 0.5) * 3
+	});
+};
+
+gui.add(debugObj, 'createSphere');
 
 /**
  * Base
@@ -50,19 +61,6 @@ const defaultContactMaterial = new CANNON.ContactMaterial(defaultMaterial, defau
 
 world.addContactMaterial(defaultContactMaterial);
 
-//sphere
-const sphereShape = new CANNON.Sphere(0.5);
-const sphereBody = new CANNON.Body({
-	mass: 1,
-	position: new CANNON.Vec3(0, 3, 0),
-	shape: sphereShape,
-	material: defaultMaterial
-});
-sphereBody.applyLocalForce(new CANNON.Vec3(150, 0, 0), new CANNON.Vec3(0, 0, 0));
-world.add(sphereBody);
-
-//wind
-
 //plane
 const floorShape = new CANNON.Plane();
 const floorBody = new CANNON.Body();
@@ -72,20 +70,6 @@ floorBody.addShape(floorShape);
 //cannor.js only supports quaternion
 floorBody.quaternion.setFromAxisAngle(new CANNON.Vec3(-1, 0, 0), Math.PI * 0.5); // 1. axis , 2.an gle
 world.addBody(floorBody);
-/**
- * Test sphere
- */
-const sphere = new THREE.Mesh(
-	new THREE.SphereGeometry(0.5, 32, 32),
-	new THREE.MeshStandardMaterial({
-		metalness: 0.3,
-		roughness: 0.4,
-		envMap: environmentMapTexture
-	})
-);
-sphere.castShadow = true;
-sphere.position.y = 0.5;
-scene.add(sphere);
 
 /**
  * Floor
@@ -165,6 +149,46 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
+// utils..a
+
+const objectsToUpdate = [];
+
+const createSphere = (radius, position) => {
+	const mesh = new THREE.Mesh(
+		new THREE.SphereBufferGeometry(radius, 20, 20),
+		new THREE.MeshStandardMaterial({
+			metalness: 0.3,
+			roughness: 0.4,
+			envMap: environmentMapTexture
+		})
+	);
+	mesh.castShadow = true;
+	mesh.position.copy(position);
+	scene.add(mesh);
+
+	//cannon
+
+	const shape = new CANNON.Sphere(radius);
+	const body = new CANNON.Body({
+		mass: 1,
+		position: new CANNON.Vec3(0, 3, 0),
+		shape,
+		material: defaultMaterial
+	});
+	world.addBody(body);
+
+	//save in obj to update
+	objectsToUpdate.push({
+		mesh,
+		body
+	});
+};
+
+createSphere(0.5, {
+	x: 0,
+	y: 3,
+	z: 0
+});
 /**
  * Animate
  */
@@ -177,16 +201,12 @@ const tick = () => {
 	oldElapsedTime = elapsedTime;
 
 	// Update physics world
-
-	sphereBody.applyForce(new CANNON.Vec3(-0.5, 0, 0), sphereBody.position);
-
 	world.step(1 / 60, deltaTime, 3); // fixed timestamp , time pass from last step , iteration world can apply to catdh potential delay
 
-	sphere.position.copy(sphereBody.position);
+	for (const object of objectsToUpdate) {
+		object.mesh.position.copy(object.body.position);
+	}
 
-	// sphere.position.x = sphereBody.position.x;
-	// sphere.position.y = sphereBody.position.y;
-	// sphere.position.z = sphereBody.position.z;
 	// Update controls
 	controls.update();
 
