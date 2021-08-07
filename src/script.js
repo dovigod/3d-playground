@@ -2,15 +2,15 @@ import './style.css';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import * as dat from 'dat.gui';
-import CANNON from 'cannon';
+import * as CANNON from 'cannon-es';
 
 /**
  * Debug
  */
 const gui = new dat.GUI();
-const debugObj = {};
+const debugObject = {};
 
-debugObj.createSphere = () => {
+debugObject.createSphere = () => {
 	createSphere(Math.random() * 0.5, {
 		x: (Math.random() - 0.5) * 3,
 		y: 3,
@@ -18,7 +18,29 @@ debugObj.createSphere = () => {
 	});
 };
 
-gui.add(debugObj, 'createSphere');
+gui.add(debugObject, 'createSphere');
+
+debugObject.createBox = () => {
+	createBox(Math.random(), Math.random(), Math.random(), {
+		x: (Math.random() - 0.5) * 3,
+		y: 3,
+		z: (Math.random() - 0.5) * 3
+	});
+};
+gui.add(debugObject, 'createBox');
+
+// Reset
+debugObject.reset = () => {
+	for (const object of objectsToUpdate) {
+		// Remove body
+		object.body.removeEventListener('collide', playHitSound);
+		world.removeBody(object.body);
+
+		// Remove mesh
+		scene.remove(object.mesh);
+	}
+};
+gui.add(debugObject, 'reset');
 
 /**
  * Base
@@ -28,6 +50,21 @@ const canvas = document.querySelector('canvas.webgl');
 
 // Scene
 const scene = new THREE.Scene();
+
+/**
+ * Sounds
+ */
+const hitSound = new Audio('/sounds/hit.mp3');
+
+const playHitSound = (collision) => {
+	const impactStrength = collision.contact.getImpactVelocityAlongNormal();
+
+	if (impactStrength > 1.5) {
+		hitSound.volume = Math.random();
+		hitSound.currentTime = 0;
+		hitSound.play();
+	}
+};
 
 /**
  * Textures
@@ -43,33 +80,102 @@ const environmentMapTexture = cubeTextureLoader.load([
 	'/textures/environmentMaps/0/pz.png',
 	'/textures/environmentMaps/0/nz.png'
 ]);
-/*
-physics
-*/
-const world = new CANNON.World(); // 1. create world
-world.gravity.set(0, -9.82, 0); // type vec3 not vector3
 
-// material
+/**
+ * Physics
+ */
+const world = new CANNON.World();
+world.broadphase = new CANNON.SAPBroadphase(world);
+world.allowSleep = true;
+world.gravity.set(0, -9.82, 0);
 
+// Default material
 const defaultMaterial = new CANNON.Material('default');
-
-//friction , restitution etc..
 const defaultContactMaterial = new CANNON.ContactMaterial(defaultMaterial, defaultMaterial, {
 	friction: 0.1,
-	restitution: 0.9
+	restitution: 0.7
 });
+world.defaultContactMaterial = defaultContactMaterial;
 
-world.addContactMaterial(defaultContactMaterial);
-
-//plane
+// Floor
 const floorShape = new CANNON.Plane();
 const floorBody = new CANNON.Body();
-floorBody.material = defaultMaterial;
-floorBody.mass = 0; // setting to 0 => static
+floorBody.mass = 0;
 floorBody.addShape(floorShape);
-//cannor.js only supports quaternion
-floorBody.quaternion.setFromAxisAngle(new CANNON.Vec3(-1, 0, 0), Math.PI * 0.5); // 1. axis , 2.an gle
+floorBody.quaternion.setFromAxisAngle(new CANNON.Vec3(-1, 0, 0), Math.PI * 0.5);
 world.addBody(floorBody);
+
+/**
+ * Utils
+ */
+const objectsToUpdate = [];
+
+// Create sphere
+const sphereGeometry = new THREE.SphereGeometry(1, 20, 20);
+const sphereMaterial = new THREE.MeshStandardMaterial({
+	metalness: 0.3,
+	roughness: 0.4,
+	envMap: environmentMapTexture
+});
+
+const createSphere = (radius, position) => {
+	// Three.js mesh
+	const mesh = new THREE.Mesh(sphereGeometry, sphereMaterial);
+	mesh.castShadow = true;
+	mesh.scale.set(radius, radius, radius);
+	mesh.position.copy(position);
+	scene.add(mesh);
+
+	// Cannon.js body
+	const shape = new CANNON.Sphere(radius);
+
+	const body = new CANNON.Body({
+		mass: 1,
+		position: new CANNON.Vec3(0, 3, 0),
+		shape: shape,
+		material: defaultMaterial
+	});
+	body.position.copy(position);
+	body.addEventListener('collide', playHitSound);
+	world.addBody(body);
+
+	// Save in objects
+	objectsToUpdate.push({ mesh, body });
+};
+
+// Create box
+const boxGeometry = new THREE.BoxGeometry(1, 1, 1);
+const boxMaterial = new THREE.MeshStandardMaterial({
+	metalness: 0.3,
+	roughness: 0.4,
+	envMap: environmentMapTexture
+});
+const createBox = (width, height, depth, position) => {
+	// Three.js mesh
+	const mesh = new THREE.Mesh(boxGeometry, boxMaterial);
+	mesh.scale.set(width, height, depth);
+	mesh.castShadow = true;
+	mesh.position.copy(position);
+	scene.add(mesh);
+
+	// Cannon.js body
+	const shape = new CANNON.Box(new CANNON.Vec3(width * 0.5, height * 0.5, depth * 0.5));
+
+	const body = new CANNON.Body({
+		mass: 1,
+		position: new CANNON.Vec3(0, 3, 0),
+		shape: shape,
+		material: defaultMaterial
+	});
+	body.position.copy(position);
+	body.addEventListener('collide', playHitSound);
+	world.addBody(body);
+
+	// Save in objects
+	objectsToUpdate.push({ mesh, body });
+};
+
+createBox(1, 1.5, 2, { x: 0, y: 3, z: 0 });
 
 /**
  * Floor
@@ -149,46 +255,6 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-// utils..a
-
-const objectsToUpdate = [];
-
-const createSphere = (radius, position) => {
-	const mesh = new THREE.Mesh(
-		new THREE.SphereBufferGeometry(radius, 20, 20),
-		new THREE.MeshStandardMaterial({
-			metalness: 0.3,
-			roughness: 0.4,
-			envMap: environmentMapTexture
-		})
-	);
-	mesh.castShadow = true;
-	mesh.position.copy(position);
-	scene.add(mesh);
-
-	//cannon
-
-	const shape = new CANNON.Sphere(radius);
-	const body = new CANNON.Body({
-		mass: 1,
-		position: new CANNON.Vec3(0, 3, 0),
-		shape,
-		material: defaultMaterial
-	});
-	world.addBody(body);
-
-	//save in obj to update
-	objectsToUpdate.push({
-		mesh,
-		body
-	});
-};
-
-createSphere(0.5, {
-	x: 0,
-	y: 3,
-	z: 0
-});
 /**
  * Animate
  */
@@ -200,11 +266,12 @@ const tick = () => {
 	const deltaTime = elapsedTime - oldElapsedTime;
 	oldElapsedTime = elapsedTime;
 
-	// Update physics world
-	world.step(1 / 60, deltaTime, 3); // fixed timestamp , time pass from last step , iteration world can apply to catdh potential delay
+	// Update physics
+	world.step(1 / 60, deltaTime, 3);
 
 	for (const object of objectsToUpdate) {
 		object.mesh.position.copy(object.body.position);
+		object.mesh.quaternion.copy(object.body.quaternion);
 	}
 
 	// Update controls
