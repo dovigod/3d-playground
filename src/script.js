@@ -1,9 +1,9 @@
 import './style.css';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import * as dat from 'dat.gui';
-import { GLTFLoader } from '../node_modules/three/examples/jsm/loaders/GLTFLoader.js';
-import { DRACOLoader } from '../node_modules/three/examples/jsm/loaders/DRACOLoader.js';
 
 /**
  * Base
@@ -18,10 +18,25 @@ const canvas = document.querySelector('canvas.webgl');
 const scene = new THREE.Scene();
 
 /**
+ * Models
+ */
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderPath('/draco/');
+
+const gltfLoader = new GLTFLoader();
+gltfLoader.setDRACOLoader(dracoLoader);
+
+let mixer = null;
+
+gltfLoader.load('/models/hamburger.glb', (gltf) => {
+	scene.add(gltf.scene);
+});
+
+/**
  * Floor
  */
 const floor = new THREE.Mesh(
-	new THREE.PlaneGeometry(10, 10),
+	new THREE.PlaneGeometry(50, 50),
 	new THREE.MeshStandardMaterial({
 		color: '#444444',
 		metalness: 0,
@@ -31,41 +46,6 @@ const floor = new THREE.Mesh(
 floor.receiveShadow = true;
 floor.rotation.x = -Math.PI * 0.5;
 scene.add(floor);
-
-//material
-
-const gltfLoader = new GLTFLoader();
-const dracoLoader = new DRACOLoader();
-dracoLoader.setDecoderPath('/draco/');
-gltfLoader.setDRACOLoader(dracoLoader);
-
-const duck = gltfLoader.load('models/Duck/glTF-Draco/Duck.gltf', (gltf) => {
-	scene.add(gltf.scene.children[0]);
-});
-
-let mixer = null;
-
-const fox = gltfLoader.load(
-	'models/Fox/glTF/Fox.gltf',
-	(gltf) => {
-		console.log(gltf);
-
-		mixer = new THREE.AnimationMixer(gltf.scene);
-		const action = mixer.clipAction(gltf.animations[0]);
-		action.play();
-		//mixer , update every frame
-
-		gltf.scene.scale.set(0.025, 0.025, 0.025);
-		gltf.scene.position.set(2, 0, 0);
-		scene.add(gltf.scene);
-	},
-	() => {
-		console.log('progress');
-	},
-	() => {
-		console.log('error');
-	}
-);
 
 /**
  * Lights
@@ -111,12 +91,12 @@ window.addEventListener('resize', () => {
  */
 // Base camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100);
-camera.position.set(2, 2, 2);
+camera.position.set(-8, 4, 8);
 scene.add(camera);
 
 // Controls
 const controls = new OrbitControls(camera, canvas);
-controls.target.set(0, 0.75, 0);
+controls.target.set(0, 1, 0);
 controls.enableDamping = true;
 
 /**
@@ -141,8 +121,7 @@ const tick = () => {
 	const deltaTime = elapsedTime - previousTime;
 	previousTime = elapsedTime;
 
-	//update mixer
-	if (mixer !== null) {
+	if (mixer) {
 		mixer.update(deltaTime);
 	}
 
