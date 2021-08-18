@@ -2,6 +2,9 @@ import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'dat.gui'
+import {GLTFLoader} from "../node_modules/three/examples/jsm/loaders/GLTFLoader.js";
+
+
 
 /**
  * Base
@@ -29,6 +32,26 @@ const floor = new THREE.Mesh(
 floor.receiveShadow = true
 floor.rotation.x = - Math.PI * 0.5
 scene.add(floor)
+
+
+//material
+
+const gltfLoader = new GLTFLoader();
+
+const duck = gltfLoader.load(
+	'models/Duck/glTF/Duck.gltf',
+	(gltf) => {
+		console.log(gltf)
+		scene.add(gltf.scene.children[0])
+	},
+	() =>{
+		console.log('progress')
+	},
+	() => {
+		console.log('error')
+	}
+)
+
 
 /**
  * Lights
