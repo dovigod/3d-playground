@@ -1,9 +1,16 @@
 uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 modelMatrix;
+uniform vec2 uFrequency;
+uniform float uTime;
 
 attribute vec3 position;
+attribute float aRandom;
+attribute vec2 uv;
 
+varying float vRandom;
+varying vec2 vUv;
+varying float vElevation;
 float testing(float a,float b){
     
     return a+b;
@@ -11,15 +18,26 @@ float testing(float a,float b){
 
 void main()
 {
-    //     float fooBar=.123;
-    //     vec2 foo=vec2(1.,2.);
-    //     foo.x=3.;
-    //     foo.y=4.;
-    //     foo*=2.;// ==> 6 ,8
-    vec2 foo=vec2(1.,2.);
-    vec3 bar=vec3(foo,3.);
-    vec3 car=bar.xzy;//swizzle
-    float result=testing(2.,3.);
     
-    gl_Position=projectionMatrix*viewMatrix*modelMatrix*vec4(position,1.);
+    vec4 modelPosition=modelMatrix*vec4(position,1.);
+    float elevation=sin(modelPosition.x*uFrequency.x+uTime)*.1;
+    elevation+=sin(modelPosition.y*uFrequency.y+uTime)*.1;
+    
+    modelPosition.z+=elevation;
+    
+    // modelPosition.z+=sin(modelPosition.x*uFrequency.x+uTime)*.1;
+    // modelPosition.z+=sin(modelPosition.y*uFrequency.y+uTime)*.1;
+    // modelPosition.z+=aRandom*.1;
+    
+    // modelPosition.y+=uTime;
+    // modelPosition.y*=.5;
+    vec4 viewPosition=viewMatrix*modelPosition;
+    vec4 projectedPosition=projectionMatrix*viewPosition;
+    
+    gl_Position=projectedPosition;
+    vRandom=aRandom;
+    vUv=uv;
+    vElevation=elevation;
+    //     gl_Position=projectionMatrix*viewMatrix*modelMatrix*vec4(position,1.);
+// }
 }

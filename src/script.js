@@ -5,6 +5,8 @@ import * as dat from 'dat.gui';
 import testVertexShader from './shader/test/vertex.glsl';
 import testFragmentShader from './shader/test/fragment.glsl';
 
+const textureLoader = new THREE.TextureLoader();
+const texture = textureLoader.load('./flag.png');
 /**
  * Base
  */
@@ -20,7 +22,6 @@ const scene = new THREE.Scene();
 /**
  * Textures
  */
-const textureLoader = new THREE.TextureLoader();
 
 /**
  * Test mesh
@@ -28,16 +29,34 @@ const textureLoader = new THREE.TextureLoader();
 // Geometry
 const geometry = new THREE.PlaneGeometry(1, 1, 32, 32);
 
+const count = geometry.attributes.position.count;
+//exact count of vertices
+
+const randoms = new Float32Array(count);
+
+for (let i = 0; i < count; i++) {
+	randoms[i] = Math.random();
+}
+
+geometry.setAttribute('aRandom', new THREE.BufferAttribute(randoms, 1));
 // Material
 const material = new THREE.RawShaderMaterial({
 	vertexShader: testVertexShader,
 	fragmentShader: testFragmentShader,
 	//wireframe: true,
-	side: THREE.DoubleSide
+	side: THREE.DoubleSide,
+	uniforms: {
+		uFrequency: { value: new THREE.Vector2(10, 5) },
+		uTime: { value: 0 },
+		uColor: { value: new THREE.Color('orange') },
+		uTexture: {
+			value: texture
+		}
+	}
 });
-
 // Mesh
 const mesh = new THREE.Mesh(geometry, material);
+mesh.scale.y = 2 / 3;
 scene.add(mesh);
 
 /**
@@ -91,6 +110,7 @@ const clock = new THREE.Clock();
 const tick = () => {
 	const elapsedTime = clock.getElapsedTime();
 
+	material.uniforms.uTime.value = elapsedTime;
 	// Update controls
 	controls.update();
 
